@@ -15,7 +15,7 @@ const Community = () => {
         </div>
         <button
           className="btn btn-primary btn-sm gap-2"
-          onClick={() => { setPostType(activeTab === 'polls' ? 'poll' : 'text'); setIsModalOpen(true); }}
+          onClick={() => { setPostType('text'); setIsModalOpen(true); }}
         >
           <span>+</span> Create {activeTab === 'polls' ? 'Poll' : 'Post'}
         </button>
@@ -23,35 +23,66 @@ const Community = () => {
 
       {/* Creation Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="card w-full max-w-lg bg-base-100 shadow-2xl border border-white/10 animate-pop-in">
-            <div className="card-body">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg">Create New {postType === 'poll' ? 'Poll' : 'Discussion'}</h3>
-                <button onClick={() => setIsModalOpen(false)}><XMarkIcon className="w-6 h-6" /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="card w-full max-w-lg bg-[#1e2124] shadow-2xl border border-white/5 animate-pop-in">
+            <div className="card-body p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-xl text-white">Create Post</h3>
+                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Post Type Switcher */}
+              <div className="flex bg-[#2b2d31] p-1 rounded-lg mb-6">
+                <button
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${postType === 'text' ? 'bg-[#40444b] text-white shadow-sm' : 'text-gray-400 hover:text-gray-300'}`}
+                  onClick={() => setPostType('text')}
+                >
+                  Text Post
+                </button>
+                <button
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${postType === 'poll' ? 'bg-[#40444b] text-white shadow-sm' : 'text-gray-400 hover:text-gray-300'}`}
+                  onClick={() => setPostType('poll')}
+                >
+                  Poll
+                </button>
               </div>
 
               <div className="form-control mb-4">
-                <label className="label">Title</label>
-                <input type="text" placeholder="What's on your mind?" className="input input-bordered w-full" />
+                <label className="label text-xs font-bold text-gray-300 uppercase">Title</label>
+                <input
+                  type="text"
+                  placeholder="What's on your mind?"
+                  className="input input-bordered w-full bg-[#2b2d31] border-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-white placeholder-gray-500"
+                />
               </div>
 
               {postType === 'text' ? (
                 <div className="form-control mb-4">
-                  <label className="label">Content</label>
-                  <textarea className="textarea textarea-bordered h-32" placeholder="Share your thoughts or ask a question..."></textarea>
+                  <label className="label text-xs font-bold text-gray-300 uppercase">Content</label>
+                  <textarea
+                    className="textarea textarea-bordered h-32 bg-[#2b2d31] border-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-white placeholder-gray-500"
+                    placeholder="Share your thoughts or ask a question..."
+                  ></textarea>
                 </div>
               ) : (
                 <div className="space-y-3 mb-4">
-                  <label className="label">Poll Options</label>
-                  <input type="text" placeholder="Option 1" className="input input-bordered w-full input-sm" />
-                  <input type="text" placeholder="Option 2" className="input input-bordered w-full input-sm" />
-                  <button className="btn btn-ghost btn-xs">+ Add Option</button>
+                  <label className="label text-xs font-bold text-gray-300 uppercase">Poll Options</label>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input type="text" placeholder="Option 1" className="input input-bordered w-full input-sm bg-[#2b2d31] border-none text-white" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="text" placeholder="Option 2" className="input input-bordered w-full input-sm bg-[#2b2d31] border-none text-white" />
+                    </div>
+                  </div>
+                  <button className="btn btn-ghost btn-xs text-primary hover:bg-transparent hover:underline">+ Add Option</button>
                 </div>
               )}
 
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary w-full" onClick={() => setIsModalOpen(false)}>Post to Community</button>
+              <div className="card-actions justify-end mt-4">
+                <button className="btn btn-primary w-full" onClick={() => setIsModalOpen(false)}>Post</button>
               </div>
             </div>
           </div>
