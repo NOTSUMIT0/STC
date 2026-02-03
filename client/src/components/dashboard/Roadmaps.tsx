@@ -5,8 +5,14 @@ const roadmaps = [
   { title: 'Backend Developer', url: 'https://roadmap.sh/backend', icon: '⚙️', color: 'text-secondary' },
   { title: 'DevOps', url: 'https://roadmap.sh/devops', icon: '🚀', color: 'text-accent' },
   { title: 'Full Stack', url: 'https://roadmap.sh/full-stack', icon: '💻', color: 'text-info' },
+  { title: 'Android', url: 'https://roadmap.sh/android', icon: '🤖', color: 'text-success' },
+  { title: 'PostgreSQL', url: 'https://roadmap.sh/postgresql', icon: '🐘', color: 'text-blue-400' },
   { title: 'AI & Data Scientist', url: 'https://roadmap.sh/ai-data-scientist', icon: '🧠', color: 'text-warning' },
+  { title: 'Blockchain', url: 'https://roadmap.sh/blockchain', icon: '🔗', color: 'text-orange-500' },
   { title: 'Cyber Security', url: 'https://roadmap.sh/cyber-security', icon: '🛡️', color: 'text-error' },
+  { title: 'UX Design', url: 'https://roadmap.sh/ux-design', icon: '✨', color: 'text-purple-400' },
+  { title: 'Game Developer', url: 'https://roadmap.sh/game-developer', icon: '🎮', color: 'text-red-400' },
+  { title: 'Technical Writer', url: 'https://roadmap.sh/technical-writer', icon: '📝', color: 'text-gray-400' },
 ];
 
 const Roadmaps = () => {

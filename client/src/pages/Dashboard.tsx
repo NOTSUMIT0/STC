@@ -1,42 +1,23 @@
 import { useState } from 'react';
+import Roadmaps from '../components/dashboard/Roadmaps';
+import Resources from '../components/dashboard/Resources';
+import Community from '../components/dashboard/Community';
+import Settings from '../components/dashboard/Settings';
+import Profile from '../components/dashboard/Profile';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('Overview');
 
-  return (
-    <div className="drawer lg:drawer-open bg-base-300 text-base-content min-h-screen font-sans">
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-center justify-start">
-        {/* Navbar for Mobile */}
-        <div className="w-full navbar bg-base-100 lg:hidden shadow-md">
-          <div className="flex-none">
-            <label htmlFor="my-drawer-2" className="btn btn-square btn-ghost">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </label>
-          </div>
-          <div className="flex-1 px-2 mx-2 text-xl font-bold text-primary">StudentPlatform</div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="w-full p-6 lg:p-10 max-w-7xl">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-              <p className="text-gray-400 mt-1">Welcome back, Student</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="btn btn-square btn-ghost btn-sm bg-base-200"><span className="text-lg">🔔</span></button>
-              <div className="avatar placeholder">
-                <div className="bg-neutral-focus text-neutral-content rounded-full w-10">
-                  <span className="text-xs">UI</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Grid - Mimicking the Screenshot Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'Roadmaps': return <Roadmaps />;
+      case 'Resources': return <Resources />;
+      case 'Community': return <Community />;
+      case 'Settings': return <Settings />;
+      case 'Profile': return <Profile />;
+      default:
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
             {/* Left Col - Filters/Preview */}
             <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
               <div className="card bg-base-200 border-l-4 border-primary shadow-lg hover:shadow-primary/20 transition-all">
@@ -119,57 +100,112 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+            {/* Bottom Table */}
+            <div className="col-span-4 card bg-base-100 shadow-xl overflow-x-auto">
+              <table className="table">
+                {/* head */}
+                <thead>
+                  <tr>
+                    <th>Topic</th>
+                    <th>Status</th>
+                    <th>Difficulty</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { topic: 'Binary Trees', status: 'In Progress', diff: 'Medium', color: 'badge-warning' },
+                    { topic: 'Graph Traversal', status: 'Completed', diff: 'Hard', color: 'badge-success' },
+                    { topic: 'Dynamic Programming', status: 'Pending', diff: 'Hard', color: 'badge-error' },
+                  ].map((row, i) => (
+                    <tr key={i} className="hover:bg-base-200">
+                      <td className="font-bold">{row.topic}</td>
+                      <td><div className={`badge ${row.color} badge-sm`}>{row.status}</div></td>
+                      <td>{row.diff}</td>
+                      <td><button className="btn btn-xs btn-ghost">Start</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="drawer lg:drawer-open bg-base-300 text-base-content min-h-screen font-sans">
+      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
+      <div className="drawer-content flex flex-col items-center justify-start">
+        {/* Navbar for Mobile */}
+        <div className="w-full navbar bg-base-100 lg:hidden shadow-md">
+          <div className="flex-none">
+            <label htmlFor="my-drawer-2" className="btn btn-square btn-ghost">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </label>
+          </div>
+          <div className="flex-1 px-2 mx-2 text-xl font-bold text-primary">StudentPlatform</div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="w-full p-6 lg:p-10 max-w-7xl">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-white">{activeTab === 'Overview' ? 'Dashboard' : activeTab}</h1>
+              <p className="text-gray-400 mt-1">
+                {activeTab === 'Overview' && 'Welcome back, Student'}
+                {activeTab === 'Roadmaps' && 'Choose your learning path'}
+                {activeTab === 'Resources' && 'Library of knowledge'}
+                {activeTab === 'Community' && 'Connect with peers'}
+                {activeTab === 'Settings' && 'Manage your preferences'}
+                {activeTab === 'Profile' && 'Edit your details'}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button className="btn btn-ghost btn-circle relative">
+                <span className="text-lg">🔔</span>
+                <span className="badge badge-error badge-xs absolute top-2 right-2"></span>
+              </button>
+              <div className="dropdown dropdown-end">
+                <div tabIndex={0} role="button" className="avatar placeholder cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-neutral-focus text-neutral-content rounded-full w-10 ring ring-primary ring-offset-base-100 ring-offset-2">
+                    <span className="text-xs">UI</span>
+                  </div>
+                </div>
+                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-xl bg-base-200 rounded-box w-52 border border-white/5 space-y-1">
+                  <li><a onClick={() => setActiveTab('Profile')}>👤 Profile</a></li>
+                  <li><a onClick={() => setActiveTab('Settings')}>⚙️ Settings</a></li>
+                  <div className="divider my-0"></div>
+                  <li><a className="text-error">Log Out</a></li>
+                </ul>
+              </div>
+            </div>
           </div>
 
-          {/* Bottom Table */}
-          <div className="card bg-base-100 shadow-xl overflow-x-auto">
-            <table className="table">
-              {/* head */}
-              <thead>
-                <tr>
-                  <th>Topic</th>
-                  <th>Status</th>
-                  <th>Difficulty</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { topic: 'Binary Trees', status: 'In Progress', diff: 'Medium', color: 'badge-warning' },
-                  { topic: 'Graph Traversal', status: 'Completed', diff: 'Hard', color: 'badge-success' },
-                  { topic: 'Dynamic Programming', status: 'Pending', diff: 'Hard', color: 'badge-error' },
-                ].map((row, i) => (
-                  <tr key={i} className="hover:bg-base-200">
-                    <td className="font-bold">{row.topic}</td>
-                    <td><div className={`badge ${row.color} badge-sm`}>{row.status}</div></td>
-                    <td>{row.diff}</td>
-                    <td><button className="btn btn-xs btn-ghost">Start</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Dynamic Content */}
+          {renderContent()}
 
         </div>
       </div>
 
       {/* Sidebar Drawer */}
-      <div className="drawer-side">
+      <div className="drawer-side z-50">
         <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
-        <ul className="menu p-4 w-64 min-h-full bg-base-200 text-base-content flex flex-col justify-between">
+        <ul className="menu p-4 w-64 min-h-full bg-base-200 text-base-content flex flex-col justify-between border-r border-white/5">
           <div>
             <div className="mb-8 px-4">
               <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">StudyOS</span>
             </div>
-            <li className="mb-1"><a className={`${activeTab === 'Overview' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white' : ''}`} onClick={() => setActiveTab('Overview')}>Dashboard</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Roadmaps' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white' : ''}`} onClick={() => setActiveTab('Roadmaps')}>Roadmaps</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Resources' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white' : ''}`} onClick={() => setActiveTab('Resources')}>Resources</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Community' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white' : ''}`} onClick={() => setActiveTab('Community')}>Community</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Settings' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white' : ''}`} onClick={() => setActiveTab('Settings')}>Settings</a></li>
+            <li className="mb-1"><a className={`${activeTab === 'Overview' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Overview')}>Dashboard</a></li>
+            <li className="mb-1"><a className={`${activeTab === 'Roadmaps' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Roadmaps')}>Roadmaps</a></li>
+            <li className="mb-1"><a className={`${activeTab === 'Resources' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Resources')}>Resources</a></li>
+            <li className="mb-1"><a className={`${activeTab === 'Community' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Community')}>Community</a></li>
+            <li className="mb-1"><a className={`${activeTab === 'Settings' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Settings')}>Settings</a></li>
           </div>
-          <div className="p-4 bg-base-100 rounded-xl bg-opacity-50">
+          <div className="p-4 bg-base-100 rounded-xl bg-opacity-50 border border-white/5">
             <p className="text-xs opacity-70 mb-2">Need Help?</p>
-            <button className="btn btn-sm btn-outline w-full">Contact Support</button>
+            <button className="btn btn-sm btn-outline w-full hover:bg-primary hover:text-white transition-colors">Contact Support</button>
           </div>
         </ul>
       </div>

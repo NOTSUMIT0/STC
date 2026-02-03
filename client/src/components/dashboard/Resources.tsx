@@ -6,6 +6,11 @@ const resources = [
   { title: 'Designing Data-Intensive Applications', type: 'pdf', icon: DocumentTextIcon, tag: 'System Design' },
   { title: 'You Don\'t Know JS (Book Series)', type: 'pdf', icon: DocumentTextIcon, tag: 'Javascript' },
   { title: 'React Documentation', type: 'link', icon: LinkIcon, tag: 'React' },
+  { title: 'FreeCodeCamp Legacy Certifications', type: 'link', icon: LinkIcon, tag: 'Full Stack' },
+  { title: 'Clean Code by Robert C. Martin', type: 'pdf', icon: DocumentTextIcon, tag: 'Best Practices' },
+  { title: 'NeetCode 150 - Algorithms', type: 'video', icon: VideoCameraIcon, tag: 'DSA' },
+  { title: 'Docker for Beginners', type: 'video', icon: VideoCameraIcon, tag: 'DevOps' },
+  { title: 'MDN Web Docs', type: 'link', icon: LinkIcon, tag: 'Web Reference' },
 ];
 
 const Resources = () => {
