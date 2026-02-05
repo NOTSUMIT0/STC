@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import postRoutes from './routes/posts.js';
 import resourceRoutes from './routes/resources.js';
+import communityRoutes from './routes/communities.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/communities', communityRoutes);
 
 // Database Connection
 console.log('Attempting to connect to MongoDB...');
