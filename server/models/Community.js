@@ -25,6 +25,9 @@ const communitySchema = new mongoose.Schema({
     type: String,
     default: 'stc-community',
   },
+  banner: {
+    type: String, // URL to banner image
+  },
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
