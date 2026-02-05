@@ -11,10 +11,18 @@ const communitySchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    maxlength: 500, // Limit Description
+    maxlength: 500,
+  },
+  rules: {
+    type: String, // Or Array of strings if we want structured rules
+  },
+  privacy: {
+    type: String,
+    enum: ['public', 'restricted', 'private'],
+    default: 'public'
   },
   icon: {
-    type: String, // URL or Dicebear seed
+    type: String,
     default: 'stc-community',
   },
   creator: {

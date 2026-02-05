@@ -36,7 +36,7 @@ router.get('/my', async (req, res) => {
 // POST create community
 router.post('/', async (req, res) => {
   try {
-    const { name, description, icon, userId } = req.body;
+    const { name, description, icon, userId, rules, privacy } = req.body;
 
     const existing = await Community.findOne({ name });
     if (existing) return res.status(400).json({ message: 'Community name already taken' });
@@ -44,6 +44,8 @@ router.post('/', async (req, res) => {
     const newCommunity = new Community({
       name,
       description,
+      rules,
+      privacy,
       icon,
       creator: userId,
       members: [userId], // Creator auto-joins

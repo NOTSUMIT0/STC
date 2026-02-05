@@ -41,10 +41,10 @@ const postSchema = new mongoose.Schema({
       default: 'Felix',
     },
   },
-  likes: { // We can use this as 'upvotes'
-    type: Number,
-    default: 0,
-  },
+  likes: [{ // Array of User IDs who upvoted
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

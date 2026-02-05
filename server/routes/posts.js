@@ -86,13 +86,25 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// PUT like a post (Upvote)
+// PUT like/upvote a post (Toggle)
 router.put('/:id/like', async (req, res) => {
   try {
+    const { userId } = req.body;
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    post.likes += 1;
+    // Ensure likes is an array initialized (in case of legacy data)
+    if (!Array.isArray(post.likes)) {
+      post.likes = [];
+    }
+
+    const index = post.likes.indexOf(userId);
+    if (index === -1) {
+      post.likes.push(userId); // Upvote
+    } else {
+      post.likes.splice(index, 1); // Downvote (remove)
+    }
+
     const updatedPost = await post.save();
     res.json(updatedPost);
   } catch (err) {
@@ -100,14 +112,38 @@ router.put('/:id/like', async (req, res) => {
   }
 });
 
+// PUT edit a post
+router.put('/:id', async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const post = await Post.findByIdAndUpdate(
+      req.params.id,
+      { title, content },
+      { new: true }
+    );
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE a post
+router.delete('/:id', async (req, res) => {
+  try {
+    await Post.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Post deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // PUT vote on a poll
 router.put('/:id/vote', async (req, res) => {
-  const { optionIndex } = req.body; // Expecting index of the option
+  const { optionIndex } = req.body;
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
     if (post.type !== 'poll') return res.status(400).json({ message: 'Not a poll' });
-    if (!post.options[optionIndex]) return res.status(400).json({ message: 'Invalid option' });
 
     post.options[optionIndex].votes += 1;
     const updatedPost = await post.save();
