@@ -11,6 +11,7 @@ import Community from '../components/dashboard/Community';
 import Settings from '../components/dashboard/Settings';
 import Profile from '../components/dashboard/Profile';
 import SupportModal from '../components/dashboard/SupportModal';
+import TodoList from '../components/dashboard/TodoList';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -36,20 +37,8 @@ const Dashboard = () => {
                   <p className="text-xs mt-2 text-gray-400">DSA Course Completed</p>
                 </div>
               </div>
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body p-4">
-                  <h3 className="font-bold text-sm mb-3">Today's Tasks</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 p-2 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer">
-                      <input type="checkbox" className="checkbox checkbox-xs checkbox-primary" />
-                      <span className="text-xs">Solve 2 LeetCode problems</span>
-                    </li>
-                    <li className="flex items-center gap-2 p-2 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer">
-                      <input type="checkbox" className="checkbox checkbox-xs checkbox-secondary" />
-                      <span className="text-xs">Read System Design Ch.4</span>
-                    </li>
-                  </ul>
-                </div>
+              <div className="h-[400px]">
+                <TodoList />
               </div>
             </div>
 
