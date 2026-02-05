@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import postRoutes from './routes/posts.js';
 import resourceRoutes from './routes/resources.js';
 import communityRoutes from './routes/communities.js';
+import commentRoutes from './routes/comments.js';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/communities', communityRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Database Connection
 console.log('Attempting to connect to MongoDB...');
