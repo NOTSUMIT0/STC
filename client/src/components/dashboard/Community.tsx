@@ -44,9 +44,9 @@ interface PostType {
   author: {
     username: string;
     avatarSeed: string;
-    _id?: string; // Important for edit checks
+    _id?: string;
   };
-  likes: string[]; // Array of user IDs
+  likes: string[];
   createdAt: string;
 }
 
@@ -56,11 +56,18 @@ const Community = () => {
   const [communities, setCommunities] = useState<CommunityType[]>([]);
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterMode, setFilterMode] = useState<'hot' | 'new' | 'top'>('hot'); // hot default
+  const [filterMode, setFilterMode] = useState<'hot' | 'new' | 'top'>('hot');
 
   // UI State
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
+
+  // Edit State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState<PostType | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
 
   // Forms
@@ -74,13 +81,14 @@ const Community = () => {
   const [newCommName, setNewCommName] = useState('');
   const [newCommDesc, setNewCommDesc] = useState('');
   const [newCommRules, setNewCommRules] = useState('');
-  const [newCommStep, setNewCommStep] = useState(1); // 1: Info, 2: Rules/Type
+  const [newCommStep, setNewCommStep] = useState(1);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  const user = JSON.parse(localStorage.getItem('user') || '{"username": "Guest", "avatarSeed": "Guest", "_id": "dummy_id"}');
+
+  // FIX: Use a valid 24-char ObjectId for dummy user to pass Mongoose validation
+  const user = JSON.parse(localStorage.getItem('user') || '{"username": "Guest", "avatarSeed": "Guest", "_id": "507f1f77bcf86cd799439011"}');
 
   useEffect(() => { fetchCommunities(); }, []);
-  // Fetch posts when dependencies change
   useEffect(() => { fetchPosts(); }, [activeCommunity, filterMode]);
 
   // --- API Actions ---
@@ -101,9 +109,7 @@ const Community = () => {
       if (res.ok) {
         let data: PostType[] = await res.json();
 
-        // Client-side Sort (as backend might not have complex sorts yet)
         if (filterMode === 'hot') {
-          // Hot: Ratio of likes to age, simplified as just likes for now or random
           data.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
         } else if (filterMode === 'new') {
           data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -126,7 +132,7 @@ const Community = () => {
     formData.append('authorAvatar', user.avatarSeed);
 
     // Determine Community ID
-    const targetCommId = activeCommunity ? activeCommunity._id : (communities.length > 0 ? communities[0]._id : null); // Fallback logic or block
+    const targetCommId = activeCommunity ? activeCommunity._id : (communities.length > 0 ? communities[0]._id : null);
     if (!targetCommId) return alert("Please join a community to post!");
 
     formData.append('communityId', targetCommId);
@@ -161,7 +167,7 @@ const Community = () => {
           name: newCommName,
           description: newCommDesc,
           rules: newCommRules,
-          userId: user._id || 'dummy_id_for_now'
+          userId: user._id // Now a valid ObjectId
         }),
       });
 
@@ -179,11 +185,10 @@ const Community = () => {
   const handleUpvote = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      // Optimistic logic: Toggle ID in array
       const post = posts.find(p => p._id === id);
       if (!post) return;
 
-      const userId = user._id || 'dummy_id';
+      const userId = user._id;
       const alreadyLiked = post.likes.includes(userId);
       const newLikes = alreadyLiked
         ? post.likes.filter(uid => uid !== userId)
@@ -207,12 +212,34 @@ const Community = () => {
     } catch (err) { console.error(err); }
   };
 
+  const openEditModal = (post: PostType) => {
+    setEditingPost(post);
+    setEditTitle(post.title);
+    setEditContent(post.content || '');
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdatePost = async () => {
+    if (!editingPost || !editTitle) return;
+    try {
+      const res = await fetch(`${API_URL}/api/posts/${editingPost._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: editTitle, content: editContent })
+      });
+      if (res.ok) {
+        setIsEditModalOpen(false);
+        fetchPosts();
+      }
+    } catch (err) { console.error(err); }
+  };
+
   const handleJoinLeave = async (commId: string, action: 'join' | 'leave') => {
     try {
       await fetch(`${API_URL}/api/communities/${commId}/${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user._id || 'dummy_id_for_now' })
+        body: JSON.stringify({ userId: user._id })
       });
       fetchCommunities();
       const updated = communities.find(c => c._id === commId);
@@ -227,13 +254,12 @@ const Community = () => {
     setExpandedComments(newSet);
   };
 
-  // --- Inner Components ---
-
+  // --- Comment Section ---
   const CommentSection = ({ postId }: { postId: string }) => {
     const [comments, setComments] = useState<CommentType[]>([]);
-    const [mainReply, setMainReply] = useState(''); // Text for box at top
-    const [replyMap, setReplyMap] = useState<{ [key: string]: string }>({}); // Map id -> content for nested
-    const [replyingToId, setReplyingToId] = useState<string | null>(null); // Which comment is being replied to
+    const [mainReply, setMainReply] = useState('');
+    const [replyMap, setReplyMap] = useState<{ [key: string]: string }>({});
+    const [replyingToId, setReplyingToId] = useState<string | null>(null);
     const [loadingComments, setLoadingComments] = useState(true);
 
     const load = async () => {
@@ -275,7 +301,7 @@ const Community = () => {
           } else {
             setMainReply('');
           }
-          load(); // Refresh tree
+          load();
         }
       } catch (e) { console.error(e); }
     };
@@ -356,13 +382,12 @@ const Community = () => {
 
   const isUserMember = (comm: CommunityType | undefined): boolean => {
     if (!comm) return false;
-    return comm.members?.includes(user._id || 'dummy_id');
+    return comm.members?.includes(user._id);
   };
 
-  // Determine which posts to show in "strict" Home view
   const visiblePosts = activeCommunity
     ? posts
-    : posts.filter(p => !p.community || (p.community && isUserMember(p.community as CommunityType))); // Only show posts from joined communities on Home
+    : posts.filter(p => !p.community || (p.community && isUserMember(p.community as CommunityType)));
 
   return (
     <div className="flex min-h-screen bg-base-300 justify-center w-full">
@@ -370,6 +395,7 @@ const Community = () => {
 
         {/* LEFT NAV */}
         <div className="w-[260px] hidden lg:flex flex-col border-r border-white/5 bg-base-200/50 sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto p-4">
+          {/* ... (Kept same) ... */}
           <div className="flex justify-between items-center mb-4 px-2">
             <span className="text-xs font-bold text-gray-500 tracking-widest">FEEDS</span>
           </div>
@@ -414,7 +440,6 @@ const Community = () => {
           )}
 
           <div className="p-4 md:p-8 max-w-4xl mx-auto md:pt-10">
-            {/* Post Creator / Join Prompt */}
             {(activeCommunity ? isUserMember(activeCommunity) : true) ? (
               <div className="bg-base-100 mb-6 rounded-xl border border-white/5 p-4 flex gap-4 items-center shadow-lg hover:border-white/10 transition-all cursor-pointer" onClick={() => setIsPostModalOpen(true)}>
                 <div className="avatar w-10 h-10 rounded-full overflow-hidden border border-white/10">
@@ -449,7 +474,7 @@ const Community = () => {
             ) : (
               <div className="space-y-4">
                 {visiblePosts.map(post => {
-                  const isLiked = post.likes && post.likes.includes(user._id || 'dummy_id');
+                  const isLiked = post.likes && post.likes.includes(user._id);
                   return (
                     <div key={post._id} className="bg-base-100 rounded-xl border border-white/5 shadow-md hover:border-white/10 transition-all overflow-hidden group">
                       <div className="p-4">
@@ -466,12 +491,11 @@ const Community = () => {
                             <span>• {new Date(post.createdAt).toLocaleDateString()}</span>
                           </div>
 
-                          {/* Edit/Delete if Author */}
-                          {/* Note: In real app use verified ID from token, here relying on local ID roughly */}
                           {(post.author._id === user._id || post.author.username === user.username) && (
                             <div className="dropdown dropdown-end">
                               <label tabIndex={0} className="btn btn-ghost btn-xs btn-circle"><Squares2X2Icon className="w-4 h-4" /></label>
                               <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-200 rounded-box w-32 border border-white/10">
+                                <li><a onClick={() => openEditModal(post)}><PencilSquareIcon className="w-4 h-4" /> Edit</a></li>
                                 <li><a className="text-error" onClick={() => handleDeletePost(post._id)}><TrashIcon className="w-4 h-4" /> Delete</a></li>
                               </ul>
                             </div>
@@ -509,7 +533,7 @@ const Community = () => {
           </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
+        {/* Right Sidebar */}
         <div className="w-[300px] hidden xl:flex flex-col gap-6 p-6 sticky top-20 h-fit">
           <div className="card bg-base-100 border border-white/5 shadow-xl">
             <div className="card-body p-4">
@@ -537,7 +561,7 @@ const Community = () => {
       </div>
 
       {/* --- MODALS --- */}
-      {/* Create Post Modal */}
+
       {isPostModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="card w-full max-w-2xl bg-[#1e2124] shadow-2xl border border-white/10">
@@ -563,7 +587,6 @@ const Community = () => {
         </div>
       )}
 
-      {/* Expanded Create Community Modal */}
       {isCommunityModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="card w-full max-w-lg bg-[#1e2124] shadow-2xl border border-white/10">
@@ -601,6 +624,26 @@ const Community = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Post Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="card w-full max-w-2xl bg-[#1e2124] shadow-2xl border border-white/10">
+            <div className="p-4 border-b border-white/10 flex justify-between items-center">
+              <h3 className="font-bold text-lg text-white">Edit Post</h3>
+              <button onClick={() => setIsEditModalOpen(false)}><XMarkIcon className="w-6 h-6 text-gray-400 hover:text-white" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <input className="input input-bordered w-full bg-[#2b2d31]" value={editTitle} onChange={e => setEditTitle(e.target.value)} />
+              <textarea className="textarea textarea-bordered h-40 w-full bg-[#2b2d31]" value={editContent} onChange={e => setEditContent(e.target.value)}></textarea>
+              <div className="flex justify-end gap-2 pt-4">
+                <button className="btn btn-ghost" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
+                <button className="btn btn-primary" onClick={handleUpdatePost}>Save Changes</button>
+              </div>
             </div>
           </div>
         </div>
