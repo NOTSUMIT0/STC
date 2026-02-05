@@ -86,7 +86,14 @@ const Community = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // FIX: Use a valid 24-char ObjectId for dummy user to pass Mongoose validation
-  const user = JSON.parse(localStorage.getItem('user') || '{"username": "Guest", "avatarSeed": "Guest", "_id": "507f1f77bcf86cd799439011"}');
+  // FIX: Ensure user always has a valid ID even if localStorage is messy
+  const rawUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = {
+    ...rawUser,
+    username: rawUser.username || "Guest",
+    avatarSeed: rawUser.avatarSeed || "Guest",
+    _id: rawUser._id || "507f1f77bcf86cd799439011"
+  };
 
   useEffect(() => { fetchCommunities(); }, []);
   useEffect(() => { fetchPosts(); }, [activeCommunity, filterMode]);
@@ -571,15 +578,76 @@ const Community = () => {
             </div>
             <div className="p-6">
               <div className="mb-4 text-sm text-gray-400">
-                Posting to: <span className="font-bold text-white">c/{activeCommunity?.name || '...'}</span>
-                {!activeCommunity && <span className="text-error ml-2">(Please select a community context first)</span>}
+                Posting to:
+                {activeCommunity ? (
+                  <span className="font-bold text-white ml-2">c/{activeCommunity.name}</span>
+                ) : (
+                  <select
+                    className="select select-bordered select-sm ml-2 max-w-xs bg-base-300 text-white"
+                    onChange={(e) => {
+                      const selected = communities.find(c => c._id === e.target.value);
+                      if (selected) setActiveCommunity(selected);
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select a community</option>
+                    {communities.map(c => (
+                      <option key={c._id} value={c._id}>c/{c.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
+
+              {/* Post Type Tabs */}
+              <div className="tabs tabs-boxed bg-base-300 mb-4">
+                <a className={`tab ${postType === 'text' ? 'tab-active' : ''}`} onClick={() => setPostType('text')}>Text</a>
+                <a className={`tab ${postType === 'image' ? 'tab-active' : ''}`} onClick={() => setPostType('image')}>Image/Video</a>
+                <a className={`tab ${postType === 'poll' ? 'tab-active' : ''}`} onClick={() => setPostType('poll')}>Poll</a>
+              </div>
+
               <div className="space-y-4">
                 <input className="input input-bordered w-full bg-[#2b2d31]" placeholder="Title" value={postTitle} onChange={e => setPostTitle(e.target.value)} />
-                <textarea className="textarea textarea-bordered h-40 w-full bg-[#2b2d31]" placeholder="Text (optional)" value={postContent} onChange={e => setPostContent(e.target.value)}></textarea>
+
+                {postType === 'text' && (
+                  <textarea className="textarea textarea-bordered h-40 w-full bg-[#2b2d31]" placeholder="Text (optional)" value={postContent} onChange={e => setPostContent(e.target.value)}></textarea>
+                )}
+
+                {postType === 'image' && (
+                  <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:bg-white/5 cursor-pointer transition-colors relative">
+                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e => setPostImage(e.target.files?.[0] || null)} accept="image/*" />
+                    {postImage ? (
+                      <div className="text-primary font-bold">{postImage.name}</div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-gray-400">
+                        <PhotoIcon className="w-8 h-8" />
+                        <span>Click to upload image</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {postType === 'poll' && (
+                  <div className="space-y-2">
+                    {pollOptions.map((opt, idx) => (
+                      <input
+                        key={idx}
+                        className="input input-bordered w-full bg-[#2b2d31]"
+                        placeholder={`Option ${idx + 1}`}
+                        value={opt}
+                        onChange={e => {
+                          const newOpts = [...pollOptions];
+                          newOpts[idx] = e.target.value;
+                          setPollOptions(newOpts);
+                        }}
+                      />
+                    ))}
+                    <button className="btn btn-xs btn-ghost text-primary" onClick={() => setPollOptions([...pollOptions, ''])}>+ Add Option</button>
+                  </div>
+                )}
+
                 <div className="flex justify-end gap-2 pt-4">
                   <button className="btn btn-ghost" onClick={() => setIsPostModalOpen(false)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={handleCreatePost}>Post</button>
+                  <button className="btn btn-primary" onClick={handleCreatePost} disabled={!activeCommunity && !communities.length}>Post</button>
                 </div>
               </div>
             </div>
