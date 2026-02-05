@@ -1,10 +1,4 @@
-import { useState } from 'react';
-// Wait, I can't just fix imports here. I need to be precise.
-
-// Correcting the duplicate import top
-// Duplicate import removed
-
-// ... (I cannot easily target two places with one replace call unless I use multi_replace. I will use multi_replace).
+import { useState, useEffect } from 'react';
 import Roadmaps from '../components/dashboard/Roadmaps';
 import Resources from '../components/dashboard/Resources';
 import Community from '../components/dashboard/Community';
@@ -12,11 +6,34 @@ import Settings from '../components/dashboard/Settings';
 import Profile from '../components/dashboard/Profile';
 import SupportModal from '../components/dashboard/SupportModal';
 import TodoList from '../components/dashboard/TodoList';
+import {
+  HomeIcon,
+  MapIcon,
+  BookOpenIcon,
+  UserGroupIcon,
+  Cog6ToothIcon,
+  BellIcon
+} from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-  const userSeed = 'Felix'; // Consistent user seed
+  const [scrolled, setScrolled] = useState(false);
+  const userSeed = 'Felix';
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navItems = [
+    { name: 'Overview', icon: HomeIcon },
+    { name: 'Roadmaps', icon: MapIcon },
+    { name: 'Resources', icon: BookOpenIcon },
+    { name: 'Community', icon: UserGroupIcon },
+    { name: 'Settings', icon: Cog6ToothIcon },
+  ];
 
   const renderContent = () => {
     switch (activeTab) {
@@ -33,7 +50,7 @@ const Dashboard = () => {
               <div className="card bg-base-200 border-l-4 border-primary shadow-lg hover:shadow-primary/20 transition-all">
                 <div className="card-body p-5">
                   <h3 className="uppercase text-xs font-bold text-gray-500 mb-2">My Progress</h3>
-                  <div className="radial-progress text-primary font-bold text-xl" style={{ "--value": 70 } as any}>70%</div>
+                  <div className="radial-progress text-primary font-bold text-xl" style={{ "--value": 70, "--size": "4rem" } as any}>70%</div>
                   <p className="text-xs mt-2 text-gray-400">DSA Course Completed</p>
                 </div>
               </div>
@@ -81,6 +98,9 @@ const Dashboard = () => {
                 </div>
                 <h3 className="font-bold text-lg">Alex Student</h3>
                 <p className="text-xs text-primary">Pro Member</p>
+                <div className="mt-4">
+                  <button onClick={() => setIsSupportModalOpen(true)} className="btn btn-sm btn-outline btn-primary w-full">Contact Support</button>
+                </div>
               </div>
 
               <div className="card bg-base-100 shadow-xl p-4">
@@ -132,81 +152,83 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="drawer lg:drawer-open bg-base-300 text-base-content min-h-screen font-sans">
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-center justify-start">
-        {/* Navbar for Mobile */}
-        <div className="w-full navbar bg-base-100 lg:hidden shadow-md">
-          <div className="flex-none">
-            <label htmlFor="my-drawer-2" className="btn btn-square btn-ghost">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </label>
-          </div>
-          <div className="flex-1 px-2 mx-2 text-xl font-bold text-primary">StudentPlatform</div>
-        </div>
+    <div className="min-h-screen bg-base-300 text-base-content font-sans">
+      {/* Top Navbar */}
+      <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/5 ${scrolled ? 'bg-base-100/80 backdrop-blur-md shadow-lg' : 'bg-base-100'}`}>
+        <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
 
-        {/* Main Content Area */}
-        <div className="w-full p-6 lg:p-10 max-w-7xl">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white">{activeTab === 'Overview' ? 'Dashboard' : activeTab}</h1>
-              <p className="text-gray-400 mt-1">
-                {activeTab === 'Overview' && 'Welcome back, Student'}
-                {activeTab === 'Roadmaps' && 'Choose your learning path'}
-                {activeTab === 'Resources' && 'Library of knowledge'}
-                {activeTab === 'Community' && 'Connect with peers'}
-                {activeTab === 'Settings' && 'Manage your preferences'}
-                {activeTab === 'Profile' && 'Edit your details'}
-              </p>
+          {/* Logo Section */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-xl flex items-center justify-center shadow-lg shadow-primary/25">
+              <span className="text-xl font-bold text-white">S</span>
             </div>
-            <div className="flex gap-2">
-              <button className="btn btn-ghost btn-circle relative">
-                <span className="text-lg">🔔</span>
-                <span className="badge badge-error badge-xs absolute top-2 right-2"></span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">STC</span>
+              <span className="text-[10px] uppercase tracking-widest text-primary font-bold">Student Platform</span>
+            </div>
+          </div>
+
+          {/* Center Navigation */}
+          <div className="hidden md:flex items-center bg-base-200/50 p-1.5 rounded-full border border-white/5 backdrop-blur-sm">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => setActiveTab(item.name)}
+                className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === item.name
+                    ? 'bg-primary text-white shadow-md shadow-primary/25'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.name}
               </button>
-              <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="avatar cursor-pointer hover:scale-105 transition-transform">
-                  <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userSeed}`} alt="Profile" />
-                  </div>
-                </div>
-                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-xl bg-base-200 rounded-box w-52 border border-white/5 space-y-1">
-                  <li><a onClick={() => setActiveTab('Profile')}>👤 Profile</a></li>
-                  <li><a onClick={() => setActiveTab('Settings')}>⚙️ Settings</a></li>
-                  <div className="divider my-0"></div>
-                  <li><a className="text-error">Log Out</a></li>
-                </ul>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Dynamic Content */}
-          {renderContent()}
+          {/* Right Actions */}
+          <div className="flex items-center gap-4">
+            <button className="btn btn-ghost btn-circle btn-sm text-gray-400 hover:text-white relative">
+              <BellIcon className="w-6 h-6" />
+              <span className="badge badge-error badge-xs absolute top-1 right-1"></span>
+            </button>
 
+            <div className="dropdown dropdown-end">
+              <div tabIndex={0} role="button" className="avatar cursor-pointer hover:opacity-80 transition-opacity">
+                <div className="w-10 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-base-100">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userSeed}`} alt="Profile" />
+                </div>
+              </div>
+              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-200 rounded-box w-52 border border-white/5 mt-4">
+                <li><a onClick={() => setActiveTab('Profile')} className="hover:bg-primary/20 hover:text-primary">👤 Profile</a></li>
+                <li><a onClick={() => setActiveTab('Settings')} className="hover:bg-primary/20 hover:text-primary">⚙️ Settings</a></li>
+                <div className="divider my-0 mb-1"></div>
+                <li><a className="text-error hover:bg-error/20">Log Out</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Sidebar Drawer */}
-      <div className="drawer-side z-50">
-        <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
-        <ul className="menu p-4 w-64 min-h-full bg-base-200 text-base-content flex flex-col justify-between border-r border-white/5">
-          <div>
-            <div className="mb-8 px-4">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">StudyOS</span>
-            </div>
-            <li className="mb-1"><a className={`${activeTab === 'Overview' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Overview')}>Dashboard</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Roadmaps' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Roadmaps')}>Roadmaps</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Resources' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Resources')}>Resources</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Community' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Community')}>Community</a></li>
-            <li className="mb-1"><a className={`${activeTab === 'Settings' ? 'active bg-gradient-to-r from-primary to-primary/50 text-white shadow-lg shadow-primary/20' : ''}`} onClick={() => setActiveTab('Settings')}>Settings</a></li>
-          </div>
-          <div className="p-4 bg-base-100 rounded-xl bg-opacity-50 border border-white/5">
-            <p className="text-xs opacity-70 mb-2">Need Help?</p>
-            <button onClick={() => setIsSupportModalOpen(true)} className="btn btn-sm btn-outline w-full hover:bg-primary hover:text-white transition-colors">Contact Support</button>
-          </div>
-        </ul>
+      {/* Main Content Padding for Navbar */}
+      <div className="pt-24 px-4 md:px-8 pb-10 max-w-7xl mx-auto">
+
+        {/* Page Header */}
+        <div className="mb-8 animate-fade-in-down">
+          <h1 className="text-4xl font-bold text-white mb-2">{activeTab === 'Overview' ? 'Dashboard' : activeTab}</h1>
+          <p className="text-gray-400">
+            {activeTab === 'Overview' && 'Welcome back, ready to learn something new?'}
+            {activeTab === 'Roadmaps' && 'Structured paths to master new skills.'}
+            {activeTab === 'Resources' && 'Curated library of learning materials.'}
+            {activeTab === 'Community' && 'Connect, discuss, and grow with peers.'}
+            {activeTab === 'Settings' && 'Manage your account and preferences.'}
+            {activeTab === 'Profile' && 'View and edit your public profile.'}
+          </p>
+        </div>
+
+        {/* Dynamic Content */}
+        {renderContent()}
       </div>
+
       <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} />
     </div>
   );
