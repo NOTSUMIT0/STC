@@ -15,11 +15,18 @@ import {
   BellIcon
 } from '@heroicons/react/24/outline';
 
-const Dashboard = () => {
+import { useLogout } from '../hooks/mutations/useAuth';
+
+const Dashboard = ({ user }: { user: any }) => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const userSeed = 'Felix';
+  const userSeed = user?.username || 'Felix';
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -93,11 +100,11 @@ const Dashboard = () => {
               <div className="card bg-gradient-to-br from-neutral to-base-100 shadow-xl text-center p-6">
                 <div className="avatar mx-auto mb-4">
                   <div className="w-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userSeed}`} alt="avatar" />
                   </div>
                 </div>
-                <h3 className="font-bold text-lg">Alex Student</h3>
-                <p className="text-xs text-primary">Pro Member</p>
+                <h3 className="font-bold text-lg">{user?.username}</h3>
+                <p className="text-xs text-primary">{user?.email}</p>
                 <div className="mt-4">
                   <button onClick={() => setIsSupportModalOpen(true)} className="btn btn-sm btn-outline btn-primary w-full">Contact Support</button>
                 </div>
@@ -202,7 +209,7 @@ const Dashboard = () => {
                 <li><a onClick={() => setActiveTab('Profile')} className="hover:bg-primary/20 hover:text-primary">👤 Profile</a></li>
                 <li><a onClick={() => setActiveTab('Settings')} className="hover:bg-primary/20 hover:text-primary">⚙️ Settings</a></li>
                 <div className="divider my-0 mb-1"></div>
-                <li><a className="text-error hover:bg-error/20">Log Out</a></li>
+                <li><button onClick={handleLogout} className="text-error hover:bg-error/20 w-full text-left">Log Out</button></li>
               </ul>
             </div>
           </div>

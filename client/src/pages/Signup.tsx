@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSignup } from '../hooks/mutations/useAuth';
 
 const Signup = () => {
   const [username, setUsername] = useState('');
@@ -7,27 +8,20 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const { mutate: signup, isPending } = useSignup();
+
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      console.log('Attempting signup with API URL:', import.meta.env.VITE_API_URL);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
+    signup({ username, email, password }, {
+      onSuccess: (data) => {
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
-      } else {
-        alert(data.message || 'Signup failed');
+      },
+      onError: (error: any) => {
+        console.error('Signup error:', error);
+        alert(error.response?.data?.message || 'Signup failed');
       }
-    } catch (error) {
-      console.error('Signup error:', error);
-      alert('Network error');
-    }
+    });
   };
 
   return (

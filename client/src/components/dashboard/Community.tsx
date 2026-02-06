@@ -11,6 +11,10 @@ import {
   Cog6ToothIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
+import { useFetchCommunities, useFetchPosts } from '../../hooks/queries/useCommunity';
+import { useCreatePost, useCreateCommunity, useEditCommunity, useDeleteCommunity, useLikePost, useDeletePost, useUpdatePost, useJoinLeaveCommunity } from '../../hooks/mutations/useCommunity';
+import { useFetchComments } from '../../hooks/queries/useComments';
+import { usePostComment, useLikeComment } from '../../hooks/mutations/useComments';
 
 // Types
 interface CommunityType {
@@ -126,35 +130,41 @@ const CommentNode = ({
 };
 
 const CommentSection = ({ postId, user, API_URL }: { postId: string, user: any, API_URL: string }) => {
-  const [comments, setComments] = useState<CommentType[]>([]);
+  const { data: rawComments = [] } = useFetchComments(postId);
   const [mainReply, setMainReply] = useState('');
   const [replyMap, setReplyMap] = useState<{ [key: string]: string }>({});
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
 
-  useEffect(() => {
-    refreshComments();
-  }, [postId]);
+  const { mutate: postCommentMutation } = usePostComment();
+  const { mutate: likeCommentMutation } = useLikeComment();
 
-  const postComment = async (parentId: string | null = null, content: string) => {
+  const comments = useMemo(() => {
+    if (!rawComments) return [];
+    const map = new Map();
+    const roots: CommentType[] = [];
+    // Deep clone to avoid mutating the cache directly if we were modifying objects (though we are assigning new properties 'replies', better safe or just rely on the fact we are building a new tree structure)
+    // Actually, rawComments is from cache. We should clone.
+    const flat = JSON.parse(JSON.stringify(rawComments));
+
+    flat.forEach((c: any) => { c.replies = []; map.set(c._id, c); });
+    flat.forEach((c: any) => { if (c.parentComment) map.get(c.parentComment)?.replies?.push(c); else roots.push(c); });
+    return roots;
+  }, [rawComments]);
+
+  const postComment = (parentId: string | null = null, content: string) => {
     if (!content.trim()) return;
-    await fetch(`${API_URL}/api/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postId, content, parentCommentId: parentId, authorName: user.username, authorAvatar: user.avatarSeed }) });
-    if (parentId) { setReplyMap({ ...replyMap, [parentId]: '' }); setReplyingToId(null); } else setMainReply('');
-    refreshComments();
-  };
-
-  const refreshComments = () => {
-    fetch(`${API_URL}/api/comments/${postId}`).then(r => r.json()).then(flat => {
-      const map = new Map(); const roots: CommentType[] = [];
-      flat.forEach((c: any) => { c.replies = []; map.set(c._id, c); });
-      flat.forEach((c: any) => { if (c.parentComment) map.get(c.parentComment)?.replies?.push(c); else roots.push(c); });
-      setComments(roots);
+    postCommentMutation({ postId, content, parentCommentId: parentId, authorName: user.username, authorAvatar: user.avatarSeed }, {
+      onSuccess: () => {
+        if (parentId) { setReplyMap({ ...replyMap, [parentId]: '' }); setReplyingToId(null); } else setMainReply('');
+      }
     });
   };
 
-  const handleVote = async (commentId: string, action: 'upvote' | 'downvote') => {
-    await fetch(`${API_URL}/api/comments/${commentId}/like`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user._id, action }) });
-    refreshComments();
+  const handleVote = (commentId: string, action: 'upvote' | 'downvote') => {
+    likeCommentMutation({ commentId, userId: user._id, action });
   };
+
+
 
   return (
     <div className="p-4 bg-[#161617] rounded-b border-x border-b border-[#343536] -mt-1 pt-6" onClick={(e) => e.stopPropagation()}>
@@ -182,10 +192,21 @@ const CommentSection = ({ postId, user, API_URL }: { postId: string, user: any, 
 const Community = () => {
   // Global State
   const [activeCommunity, setActiveCommunity] = useState<CommunityType | null>(null);
-  const [communities, setCommunities] = useState<CommunityType[]>([]);
-  const [posts, setPosts] = useState<PostType[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filterMode, setFilterMode] = useState<'hot' | 'new' | 'top'>('hot');
+
+  // Queries
+  const { data: communities = [] } = useFetchCommunities() as { data: CommunityType[] };
+  const { data: posts = [], isLoading: loading } = useFetchPosts(activeCommunity?._id, filterMode) as { data: PostType[], isLoading: boolean };
+
+  // Mutations
+  const createPostMutation = useCreatePost();
+  const createCommunityMutation = useCreateCommunity();
+  const editCommunityMutation = useEditCommunity();
+  const deleteCommunityMutation = useDeleteCommunity();
+  const likePostMutation = useLikePost();
+  const deletePostMutation = useDeletePost();
+  const updatePostMutation = useUpdatePost();
+  const joinLeaveCommunityMutation = useJoinLeaveCommunity();
 
   // UI State
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
@@ -234,36 +255,10 @@ const Community = () => {
     };
   }, []);
 
-  useEffect(() => { fetchCommunities(); }, []);
-  useEffect(() => { fetchPosts(); }, [activeCommunity, filterMode]);
-
   // --- API Actions ---
+  // No need for explicit fetch functions anymore, React Query handles it.
 
-  const fetchCommunities = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/communities`);
-      if (res.ok) setCommunities(await res.json());
-    } catch (err) { console.error(err); }
-  };
-
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      let url = `${API_URL}/api/posts`;
-      if (activeCommunity) url += `?communityId=${activeCommunity._id}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        let data: PostType[] = await res.json();
-        if (filterMode === 'hot') data.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
-        else if (filterMode === 'new') data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        else if (filterMode === 'top') data.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
-        setPosts(data);
-      }
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
-  };
-
-  const handleCreatePost = async () => {
+  const handleCreatePost = () => {
     if (!postTitle) return alert('Title is required');
     const formData = new FormData();
     formData.append('type', postType);
@@ -284,17 +279,16 @@ const Community = () => {
       formData.append('options', JSON.stringify(validOptions));
     }
 
-    try {
-      const res = await fetch(`${API_URL}/api/posts`, { method: 'POST', body: formData });
-      if (res.ok) {
+    createPostMutation.mutate(formData, {
+      onSuccess: () => {
         setIsPostModalOpen(false);
         setPostTitle(''); setPostContent(''); setPostImage(null); setPollOptions(['', '']);
-        fetchPosts();
-      }
-    } catch (err) { console.error(err); }
+      },
+      onError: (err) => console.error(err),
+    });
   };
 
-  const handleCreateCommunity = async () => {
+  const handleCreateCommunity = () => {
     if (!newCommName) return alert('Name is required');
 
     const formData = new FormData();
@@ -305,20 +299,18 @@ const Community = () => {
     if (newCommIcon) formData.append('icon', newCommIcon);
     if (newCommBanner) formData.append('banner', newCommBanner);
 
-    try {
-      const res = await fetch(`${API_URL}/api/communities`, { method: 'POST', body: formData });
-      if (res.ok) {
+    createCommunityMutation.mutate(formData, {
+      onSuccess: () => {
         setIsCommunityModalOpen(false);
         setNewCommName(''); setNewCommDesc(''); setNewCommRules(''); setNewCommIcon(null); setNewCommBanner(null); setNewCommStep(1);
-        fetchCommunities();
-      } else {
-        const data = await res.json();
-        alert(data.message || 'Failed to create community');
+      },
+      onError: (error: any) => {
+        alert(error.response?.data?.message || 'Failed to create community');
       }
-    } catch (err) { console.error(err); }
+    });
   };
 
-  const handleEditCommunity = async () => {
+  const handleEditCommunity = () => {
     if (!activeCommunity) return;
     const formData = new FormData();
     formData.append('description', editCommDesc);
@@ -327,101 +319,60 @@ const Community = () => {
     if (editCommIcon) formData.append('icon', editCommIcon);
     if (editCommBanner) formData.append('banner', editCommBanner);
 
-    try {
-      const res = await fetch(`${API_URL}/api/communities/${activeCommunity._id}`, { method: 'PUT', body: formData });
-      if (res.ok) {
-        const updated = await res.json();
+    editCommunityMutation.mutate({ id: activeCommunity._id, formData }, {
+      onSuccess: (updated) => {
         setActiveCommunity(updated);
         setIsEditCommModalOpen(false);
-        fetchCommunities(); // Update list
       }
-    } catch (err) { console.error(err); }
+    });
   };
 
-  const handleDeleteCommunity = async () => {
+  const handleDeleteCommunity = () => {
     if (!activeCommunity || !confirm("Type DELETE to confirm deletion of c/" + activeCommunity.name)) return;
-    try {
-      await fetch(`${API_URL}/api/communities/${activeCommunity._id}`, { method: 'DELETE' });
-      setActiveCommunity(null);
-      fetchCommunities();
-      alert('Community deleted');
-    } catch (err) { console.error(err); }
+    deleteCommunityMutation.mutate(activeCommunity._id, {
+      onSuccess: () => {
+        setActiveCommunity(null);
+        alert('Community deleted');
+      }
+    });
   };
 
-  const handleUpvote = async (id: string, e: React.MouseEvent) => {
+  const handleUpvote = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      const post = posts.find(p => p._id === id);
-      if (!post) return;
-      const userId = user._id;
-      // Optimistic update
-      const alreadyLiked = post.likes.includes(userId);
-      const newLikes = alreadyLiked ? post.likes.filter(uid => uid !== userId) : [...post.likes, userId];
-      const newDislikes = post.dislikes?.filter(uid => uid !== userId) || [];
-
-      setPosts(posts.map(p => p._id === id ? { ...p, likes: newLikes, dislikes: newDislikes } : p));
-
-      await fetch(`${API_URL}/api/posts/${id}/like`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, action: 'upvote' })
-      });
-    } catch (err) { console.error(err); }
+    const post = posts.find(p => p._id === id);
+    if (!post) return;
+    likePostMutation.mutate({ id, userId: user._id, action: 'upvote' });
   };
 
-  const handleDownvote = async (id: string, e: React.MouseEvent) => {
+  const handleDownvote = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      const post = posts.find(p => p._id === id);
-      if (!post) return;
-      const userId = user._id;
-      // Optimistic update
-      const alreadyDisliked = post.dislikes?.includes(userId);
-      const currentDislikes = post.dislikes || [];
-      const newDislikes = alreadyDisliked ? currentDislikes.filter(uid => uid !== userId) : [...currentDislikes, userId];
-      const newLikes = post.likes.filter(uid => uid !== userId);
-
-      setPosts(posts.map(p => p._id === id ? { ...p, likes: newLikes, dislikes: newDislikes } : p));
-
-      await fetch(`${API_URL}/api/posts/${id}/like`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, action: 'downvote' })
-      });
-    } catch (err) { console.error(err); }
+    const post = posts.find(p => p._id === id);
+    if (!post) return;
+    likePostMutation.mutate({ id, userId: user._id, action: 'downvote' });
   };
 
-  const handleDeletePost = async (id: string) => {
+  const handleDeletePost = (id: string) => {
     if (!confirm("Delete post?")) return;
-    try {
-      await fetch(`${API_URL}/api/posts/${id}`, { method: 'DELETE' });
-      setPosts(posts.filter(p => p._id !== id));
-    } catch (err) { console.error(err); }
+    deletePostMutation.mutate(id);
   };
 
-  const handleUpdatePost = async () => {
+  const handleUpdatePost = () => {
     if (!editingPost || !editTitle) return;
-    try {
-      const res = await fetch(`${API_URL}/api/posts/${editingPost._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: editTitle, content: editContent })
-      });
-      if (res.ok) { setIsEditModalOpen(false); fetchPosts(); }
-    } catch (err) { console.error(err); }
+    updatePostMutation.mutate({ id: editingPost._id, data: { title: editTitle, content: editContent } }, {
+      onSuccess: () => {
+        setIsEditModalOpen(false);
+      }
+    });
   };
 
-  const handleJoinLeave = async (commId: string, action: 'join' | 'leave') => {
-    try {
-      await fetch(`${API_URL}/api/communities/${commId}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user._id })
-      });
-      fetchCommunities();
-      const updated = communities.find(c => c._id === commId);
-      if (activeCommunity?._id === commId && updated) setActiveCommunity(updated);
-    } catch (err) { console.error(err); }
+  const handleJoinLeave = (commId: string, action: 'join' | 'leave') => {
+    joinLeaveCommunityMutation.mutate({ commId, action, userId: user._id }, {
+      onSuccess: (updatedComm: CommunityType) => {
+        if (activeCommunity?._id === commId) {
+          setActiveCommunity(updatedComm);
+        }
+      }
+    });
   };
 
   const openCommEdit = () => {

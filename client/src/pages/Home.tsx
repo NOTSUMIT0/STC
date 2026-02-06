@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-const Home = () => {
+const Home = ({ user }: { user: any }) => {
   return (
     <div className="min-h-screen bg-base-300 flex flex-col font-sans selection:bg-primary selection:text-white">
       {/* Navbar */}
@@ -11,10 +11,18 @@ const Home = () => {
           </a>
         </div>
         <div className="flex-none gap-4 px-4">
-          <Link to="/login" className="text-sm font-semibold hover:text-primary transition-colors">Login</Link>
-          <Link to="/signup" className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-0.5">
-            Get Started
-          </Link>
+          {user ? (
+            <Link to="/dashboard" className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-0.5">
+              Dashboard ({user.username})
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="text-sm font-semibold hover:text-primary transition-colors">Login</Link>
+              <Link to="/signup" className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-0.5">
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
