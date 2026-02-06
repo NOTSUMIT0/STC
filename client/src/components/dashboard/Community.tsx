@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   XMarkIcon,
   PlusIcon,
@@ -8,12 +8,8 @@ import {
   PhotoIcon,
   Squares2X2Icon,
   TrashIcon,
-  PencilSquareIcon,
-  ExclamationTriangleIcon,
   Cog6ToothIcon,
   EllipsisHorizontalIcon,
-  FlagIcon,
-  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 // Types
@@ -35,7 +31,8 @@ interface CommentType {
   content: string;
   author: { username: string; avatarSeed: string };
   parentComment?: string | null;
-  likes: number;
+  likes: string[];
+  dislikes: string[]; // Added dislikes
   createdAt: string;
   replies?: CommentType[];
 }
@@ -54,8 +51,133 @@ interface PostType {
     _id?: string;
   };
   likes: string[];
+  dislikes?: string[]; // Added dislikes
   createdAt: string;
 }
+
+interface UserType {
+  _id: string;
+  username: string;
+  avatarSeed: string;
+}
+
+const CommentNode = ({
+  comment,
+  user,
+  onVote,
+  onReply,
+  replyMap,
+  setReplyMap,
+  replyingToId,
+  setReplyingToId
+}: {
+  comment: CommentType,
+  user: UserType,
+  onVote: (id: string, action: 'upvote' | 'downvote') => void,
+  onReply: (parentId: string | null, content: string) => void,
+  replyMap: { [key: string]: string },
+  setReplyMap: (map: any) => void,
+  replyingToId: string | null,
+  setReplyingToId: (id: string | null) => void
+}) => {
+  const isLiked = comment.likes?.includes(user._id);
+  const isDisliked = comment.dislikes?.includes(user._id);
+  const score = (comment.likes?.length || 0) - (comment.dislikes?.length || 0);
+
+  return (
+    <div className="pl-4 border-l-2 border-[#343536] mt-4">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700">
+          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author.avatarSeed}`} className="w-full h-full" />
+        </div>
+        <span className="font-bold text-xs text-gray-300">{comment.author.username}</span>
+        <span className="text-[10px] text-gray-500">• {new Date(comment.createdAt).toLocaleDateString()}</span>
+      </div>
+      <p className="text-sm text-gray-200 mb-2">{comment.content}</p>
+      <div className="flex gap-4 text-xs font-bold text-gray-500 items-center">
+        <div className="flex bg-[#272729] rounded-full overflow-hidden items-center">
+          <button className={`p-1 hover:bg-[#343536] ${isLiked ? 'text-orange-500' : 'hover:text-orange-500'}`} onClick={() => onVote(comment._id, 'upvote')}><BookOpenIcon className="w-4 h-4" /></button>
+          <span className="px-1 text-gray-200">{score}</span>
+          <button className={`p-1 hover:bg-[#343536] ${isDisliked ? 'text-blue-500' : 'hover:text-blue-500'}`} onClick={() => onVote(comment._id, 'downvote')}><BookOpenIcon className="w-4 h-4 rotate-180" /></button>
+        </div>
+        <button className="hover:text-white" onClick={() => setReplyingToId(replyingToId === comment._id ? null : comment._id)}>Reply</button>
+      </div>
+      {replyingToId === comment._id && (
+        <div className="mt-2 flex gap-2">
+          <input className="input input-xs w-full bg-[#272729]" placeholder="Reply..." value={replyMap[comment._id] || ''} onChange={e => setReplyMap({ ...replyMap, [comment._id]: e.target.value })} />
+          <button className="btn btn-xs btn-primary" onClick={() => onReply(comment._id, replyMap[comment._id])}>Reply</button>
+        </div>
+      )}
+      {comment.replies?.map(r => (
+        <CommentNode
+          key={r._id}
+          comment={r}
+          user={user}
+          onVote={onVote}
+          onReply={onReply}
+          replyMap={replyMap}
+          setReplyMap={setReplyMap}
+          replyingToId={replyingToId}
+          setReplyingToId={setReplyingToId}
+        />
+      ))}
+    </div>
+  );
+};
+
+const CommentSection = ({ postId, user, API_URL }: { postId: string, user: any, API_URL: string }) => {
+  const [comments, setComments] = useState<CommentType[]>([]);
+  const [mainReply, setMainReply] = useState('');
+  const [replyMap, setReplyMap] = useState<{ [key: string]: string }>({});
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
+
+  useEffect(() => {
+    refreshComments();
+  }, [postId]);
+
+  const postComment = async (parentId: string | null = null, content: string) => {
+    if (!content.trim()) return;
+    await fetch(`${API_URL}/api/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postId, content, parentCommentId: parentId, authorName: user.username, authorAvatar: user.avatarSeed }) });
+    if (parentId) { setReplyMap({ ...replyMap, [parentId]: '' }); setReplyingToId(null); } else setMainReply('');
+    refreshComments();
+  };
+
+  const refreshComments = () => {
+    fetch(`${API_URL}/api/comments/${postId}`).then(r => r.json()).then(flat => {
+      const map = new Map(); const roots: CommentType[] = [];
+      flat.forEach((c: any) => { c.replies = []; map.set(c._id, c); });
+      flat.forEach((c: any) => { if (c.parentComment) map.get(c.parentComment)?.replies?.push(c); else roots.push(c); });
+      setComments(roots);
+    });
+  };
+
+  const handleVote = async (commentId: string, action: 'upvote' | 'downvote') => {
+    await fetch(`${API_URL}/api/comments/${commentId}/like`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user._id, action }) });
+    refreshComments();
+  };
+
+  return (
+    <div className="p-4 bg-[#161617] rounded-b border-x border-b border-[#343536] -mt-1 pt-6" onClick={(e) => e.stopPropagation()}>
+      <div className="flex gap-2 mb-6">
+        <input className="input input-sm w-full bg-[#272729]" placeholder="What are your thoughts?" value={mainReply} onChange={e => setMainReply(e.target.value)} />
+        <button className="btn btn-sm btn-primary" onClick={() => postComment(null, mainReply)}>Comment</button>
+      </div>
+      {comments.map(c => (
+        <CommentNode
+          key={c._id}
+          comment={c}
+          user={user}
+          onVote={handleVote}
+          onReply={postComment}
+          replyMap={replyMap}
+          setReplyMap={setReplyMap}
+          replyingToId={replyingToId}
+          setReplyingToId={setReplyingToId}
+        />
+      ))}
+    </div>
+  );
+};
 
 const Community = () => {
   // Global State
@@ -85,7 +207,6 @@ const Community = () => {
   const [postImage, setPostImage] = useState<File | null>(null);
   const [pollOptions, setPollOptions] = useState(['', '']);
 
-  // Create Community Form
   const [newCommName, setNewCommName] = useState('');
   const [newCommDesc, setNewCommDesc] = useState('');
   const [newCommRules, setNewCommRules] = useState('');
@@ -103,13 +224,15 @@ const Community = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // FIX: Use a valid 24-char ObjectId for dummy user
-  const rawUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const user = {
-    ...rawUser,
-    username: rawUser.username || "Guest",
-    avatarSeed: rawUser.avatarSeed || "Guest",
-    _id: rawUser._id || "507f1f77bcf86cd799439011"
-  };
+  const user = useMemo(() => {
+    const rawUser = JSON.parse(localStorage.getItem('user') || '{}');
+    return {
+      ...rawUser,
+      username: rawUser.username || "Guest",
+      avatarSeed: rawUser.avatarSeed || "Guest",
+      _id: rawUser._id || "507f1f77bcf86cd799439011"
+    };
+  }, []);
 
   useEffect(() => { fetchCommunities(); }, []);
   useEffect(() => { fetchPosts(); }, [activeCommunity, filterMode]);
@@ -231,13 +354,39 @@ const Community = () => {
       const post = posts.find(p => p._id === id);
       if (!post) return;
       const userId = user._id;
+      // Optimistic update
       const alreadyLiked = post.likes.includes(userId);
       const newLikes = alreadyLiked ? post.likes.filter(uid => uid !== userId) : [...post.likes, userId];
-      setPosts(posts.map(p => p._id === id ? { ...p, likes: newLikes } : p));
+      const newDislikes = post.dislikes?.filter(uid => uid !== userId) || [];
+
+      setPosts(posts.map(p => p._id === id ? { ...p, likes: newLikes, dislikes: newDislikes } : p));
+
       await fetch(`${API_URL}/api/posts/${id}/like`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({ userId, action: 'upvote' })
+      });
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDownvote = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const post = posts.find(p => p._id === id);
+      if (!post) return;
+      const userId = user._id;
+      // Optimistic update
+      const alreadyDisliked = post.dislikes?.includes(userId);
+      const currentDislikes = post.dislikes || [];
+      const newDislikes = alreadyDisliked ? currentDislikes.filter(uid => uid !== userId) : [...currentDislikes, userId];
+      const newLikes = post.likes.filter(uid => uid !== userId);
+
+      setPosts(posts.map(p => p._id === id ? { ...p, likes: newLikes, dislikes: newDislikes } : p));
+
+      await fetch(`${API_URL}/api/posts/${id}/like`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action: 'downvote' })
       });
     } catch (err) { console.error(err); }
   };
@@ -289,78 +438,19 @@ const Community = () => {
     setExpandedComments(newSet);
   };
 
-  // --- Comment Section ---
-  const CommentSection = ({ postId }: { postId: string }) => {
-    const [comments, setComments] = useState<CommentType[]>([]);
-    const [mainReply, setMainReply] = useState('');
-    const [replyMap, setReplyMap] = useState<{ [key: string]: string }>({});
-    const [replyingToId, setReplyingToId] = useState<string | null>(null);
 
-    useEffect(() => {
-      fetch(`${API_URL}/api/comments/${postId}`).then(r => r.json()).then(flat => {
-        const map = new Map(); const roots: CommentType[] = [];
-        flat.forEach((c: any) => { c.replies = []; map.set(c._id, c); });
-        flat.forEach((c: any) => { if (c.parentComment) map.get(c.parentComment)?.replies?.push(c); else roots.push(c); });
-        setComments(roots);
-      });
-    }, [postId]);
 
-    const postComment = async (parentId: string | null = null, content: string) => {
-      if (!content.trim()) return;
-      await fetch(`${API_URL}/api/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postId, content, parentCommentId: parentId, authorName: user.username, authorAvatar: user.avatarSeed }) });
-      if (parentId) { setReplyMap({ ...replyMap, [parentId]: '' }); setReplyingToId(null); } else setMainReply('');
-      const res = await fetch(`${API_URL}/api/comments/${postId}`);
-      const flat = await res.json();
-      const map = new Map(); const roots: CommentType[] = [];
-      flat.forEach((c: any) => { c.replies = []; map.set(c._id, c); });
-      flat.forEach((c: any) => { if (c.parentComment) map.get(c.parentComment)?.replies?.push(c); else roots.push(c); });
-      setComments(roots);
-    };
-
-    const CommentNode = ({ comment }: { comment: CommentType }) => (
-      <div className="pl-4 border-l-2 border-[#343536] mt-4">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700">
-            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author.avatarSeed}`} className="w-full h-full" />
-          </div>
-          <span className="font-bold text-xs text-gray-300">{comment.author.username}</span>
-          <span className="text-[10px] text-gray-500">• {new Date(comment.createdAt).toLocaleDateString()}</span>
-        </div>
-        <p className="text-sm text-gray-200 mb-2">{comment.content}</p>
-        <div className="flex gap-4 text-xs font-bold text-gray-500">
-          <button className="hover:text-white" onClick={() => setReplyingToId(replyingToId === comment._id ? null : comment._id)}>Reply</button>
-        </div>
-        {replyingToId === comment._id && (
-          <div className="mt-2 flex gap-2">
-            <input className="input input-xs w-full bg-[#272729]" placeholder="Reply..." value={replyMap[comment._id] || ''} onChange={e => setReplyMap({ ...replyMap, [comment._id]: e.target.value })} />
-            <button className="btn btn-xs btn-primary" onClick={() => postComment(comment._id, replyMap[comment._id])}>Reply</button>
-          </div>
-        )}
-        {comment.replies?.map(r => <CommentNode key={r._id} comment={r} />)}
-      </div>
-    );
-
-    return (
-      <div className="p-4 bg-[#161617] rounded-b border-x border-b border-[#343536] -mt-1 pt-6">
-        <div className="flex gap-2 mb-6">
-          <input className="input input-sm w-full bg-[#272729]" placeholder="What are your thoughts?" value={mainReply} onChange={e => setMainReply(e.target.value)} />
-          <button className="btn btn-sm btn-primary" onClick={() => postComment(null, mainReply)}>Comment</button>
-        </div>
-        {comments.map(c => <CommentNode key={c._id} comment={c} />)}
-      </div>
-    );
-  };
 
   const isUserMember = (comm: CommunityType | undefined) => comm?.members?.includes(user._id);
   const visiblePosts = activeCommunity ? posts : posts.filter(p => !p.community || (p.community && isUserMember(p.community as CommunityType)));
   const isMod = activeCommunity?.creator === user._id;
 
   return (
-    <div className="flex min-h-screen bg-[#0E1113] text-gray-200 justify-center w-full font-sans">
+    <div className="flex min-h-screen bg-base-300 text-gray-200 justify-center w-full font-sans">
       <div className="w-full max-w-[1600px] flex">
 
         {/* LEFT NAV (Simplified) */}
-        <div className="w-[270px] hidden lg:flex flex-col border-r border-[#343536] bg-[#0E1113] sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pt-4">
+        <div className="w-[270px] hidden lg:flex flex-col border-r border-base-300 bg-base-300 sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pt-4">
           {/* Community List items... */}
           <div className="flex justify-between items-center mb-4 px-4"><span className="text-[10px] font-bold text-gray-500 tracking-widest">FEEDS</span></div>
           <button onClick={() => setActiveCommunity(null)} className={`flex items-center gap-3 px-6 py-2 transition-all ${!activeCommunity ? 'bg-[#272729] border-r-4 border-gray-200' : 'hover:bg-[#272729]'}`}><Squares2X2Icon className="w-5 h-5" /> Home</button>
@@ -375,7 +465,7 @@ const Community = () => {
         </div>
 
         {/* CENTER CONTENT */}
-        <div className="flex-1 min-w-0 bg-[#0E1113]">
+        <div className="flex-1 min-w-0 bg-base-300">
           {/* COMMUNITY HEADER */}
           {activeCommunity ? (
             <div className="mb-4">
@@ -470,17 +560,16 @@ const Community = () => {
                       {/* ACTION BAR (VOTE + COMMENTS + SHARE) */}
                       <div className="flex gap-2 text-gray-500 text-xs font-bold items-center">
                         {/* Vote */}
-                        <div className="flex bg-[#272729] rounded-full overflow-hidden items-center">
+                        <div className="flex bg-[#272729] rounded-full overflow-hidden items-center" onClick={(e) => e.stopPropagation()}>
                           <button onClick={(e) => handleUpvote(post._id, e)} className={`p-2 hover:bg-[#343536] ${post.likes?.includes(user._id) ? 'text-orange-500' : 'hover:text-orange-500'}`}><BookOpenIcon className="w-5 h-5" /></button>
-                          <span className="px-1 text-gray-200">{post.likes?.length || 0}</span>
-                          <button className="p-2 hover:bg-[#343536] hover:text-blue-500"><BookOpenIcon className="w-5 h-5 rotate-180" /></button>
+                          <span className="px-1 text-gray-200">{(post.likes?.length || 0) - (post.dislikes?.length || 0)}</span>
+                          <button onClick={(e) => handleDownvote(post._id, e)} className={`p-2 hover:bg-[#343536] ${post.dislikes?.includes(user._id) ? 'text-blue-500' : 'hover:text-blue-500'}`}><BookOpenIcon className="w-5 h-5 rotate-180" /></button>
                         </div>
-
                         <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer" onClick={() => toggleComments(post._id)}><ChatBubbleLeftIcon className="w-5 h-5" /> {expandedComments.has(post._id) ? 'Hide Comments' : 'Comments'}</div>
                         <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(window.location.origin + "/post/" + post._id).then(() => alert("Link Copied!")); }}><ShareIcon className="w-5 h-5" /> Share</div>
                       </div>
 
-                      {expandedComments.has(post._id) && <CommentSection postId={post._id} />}
+                      {expandedComments.has(post._id) && <CommentSection postId={post._id} user={user} API_URL={API_URL} />}
                     </div>
                   </div>
                 </div>

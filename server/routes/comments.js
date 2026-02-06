@@ -36,13 +36,40 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT like a comment
+// PUT like/upvote or dislike/downvote a comment
 router.put('/:id/like', async (req, res) => {
   try {
+    const { userId, action } = req.body; // action: 'upvote' or 'downvote'
     const comment = await Comment.findById(req.params.id);
     if (!comment) return res.status(404).json({ message: 'Comment not found' });
 
-    comment.likes += 1;
+    if (!Array.isArray(comment.likes)) comment.likes = [];
+    if (!Array.isArray(comment.dislikes)) comment.dislikes = [];
+
+    const likeIndex = comment.likes.indexOf(userId);
+    const dislikeIndex = comment.dislikes.indexOf(userId);
+
+    if (action === 'upvote') {
+      if (likeIndex === -1) {
+        comment.likes.push(userId);
+        if (dislikeIndex !== -1) comment.dislikes.splice(dislikeIndex, 1);
+      } else {
+        comment.likes.splice(likeIndex, 1); // Toggle off
+      }
+    } else if (action === 'downvote') {
+      if (dislikeIndex === -1) {
+        comment.dislikes.push(userId);
+        if (likeIndex !== -1) comment.likes.splice(likeIndex, 1);
+      } else {
+        comment.dislikes.splice(dislikeIndex, 1); // Toggle off
+      }
+    }
+    // Fallback for legacy "like" toggle if no action specified (backward compatibility if needed, else redundant)
+    else if (!action && userId) {
+      if (likeIndex === -1) comment.likes.push(userId);
+      else comment.likes.splice(likeIndex, 1);
+    }
+
     await comment.save();
     res.json(comment);
   } catch (err) {

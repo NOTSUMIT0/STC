@@ -86,23 +86,34 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// PUT like/upvote a post (Toggle)
+// PUT like/upvote or dislike/downvote a post
 router.put('/:id/like', async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, action } = req.body; // action: 'upvote' or 'downvote'
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    // Ensure likes is an array initialized (in case of legacy data)
-    if (!Array.isArray(post.likes)) {
-      post.likes = [];
-    }
+    // Initialize arrays if missing
+    if (!Array.isArray(post.likes)) post.likes = [];
+    if (!Array.isArray(post.dislikes)) post.dislikes = [];
 
-    const index = post.likes.indexOf(userId);
-    if (index === -1) {
-      post.likes.push(userId); // Upvote
-    } else {
-      post.likes.splice(index, 1); // Downvote (remove)
+    const likeIndex = post.likes.indexOf(userId);
+    const dislikeIndex = post.dislikes.indexOf(userId);
+
+    if (action === 'upvote') {
+      if (likeIndex === -1) {
+        post.likes.push(userId);
+        if (dislikeIndex !== -1) post.dislikes.splice(dislikeIndex, 1);
+      } else {
+        post.likes.splice(likeIndex, 1); // Toggle off
+      }
+    } else if (action === 'downvote') {
+      if (dislikeIndex === -1) {
+        post.dislikes.push(userId);
+        if (likeIndex !== -1) post.likes.splice(likeIndex, 1);
+      } else {
+        post.dislikes.splice(dislikeIndex, 1); // Toggle off
+      }
     }
 
     const updatedPost = await post.save();
