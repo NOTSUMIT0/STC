@@ -74,7 +74,15 @@ This guide walks you through deploying your **Student Tech Community (STC)** pla
     - **Key**: `VITE_API_URL`
     - **Value**: Paste the **Backend Service URL** from Phase 3 (e.g., `https://stc-server.onrender.com`).
     *Note: Do NOT add a trailing slash `/` at the end.*
-6.  Click **"Create Static Site"**.
+7.  **Configure Rewrite Rules (CRITICAL for React Routing)**:
+    - Click on "Redirects/Rewrites".
+    - Click "Add Rule".
+    - **Source**: `/*`
+    - **Destination**: `/index.html`
+    - **Action**: `Rewrite`
+    - Click "Save Changes".
+    *This ensures that when you refresh a page (like `/dashboard`), Render serves the React app instead of looking for a non-existent file.*
+8.  Click **"Create Static Site"**.
 
 ---
 
