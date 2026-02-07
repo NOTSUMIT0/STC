@@ -23,6 +23,60 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
+// Multer Config
+import upload, { fileToBase64 } from '../middleware/upload.middleware.js';
+
+// Update Profile
+router.put('/me', authenticate, upload.single('avatar'), async (req, res) => {
+  try {
+    const { firstName, lastName, bio, fieldOfStudy, university, hobbies, avatarType, avatarValue } = req.body;
+
+    // ... (hobbies parsing logic remains same)
+
+    let parsedHobbies = [];
+    if (hobbies) {
+      try {
+        parsedHobbies = JSON.parse(hobbies);
+      } catch (e) {
+        parsedHobbies = hobbies.split(',').map(h => h.trim());
+      }
+    }
+
+    const updateData = {
+      firstName,
+      lastName,
+      bio,
+      fieldOfStudy,
+      university,
+      hobbies: parsedHobbies,
+      avatarType: avatarType || 'seed',
+    };
+
+    // If file uploaded, convert to Base64 and use as avatarValue
+    if (req.file) {
+      updateData.avatarType = 'upload';
+      updateData.avatarValue = fileToBase64(req.file);
+    } else if (avatarValue && avatarType === 'seed') {
+      updateData.avatarValue = avatarValue;
+    }
+
+    // Only update avatar fields if provided/changed, otherwise keep existing
+    // Actually, spreading works best if we construct the object carefully.
+    // Let's rely on mongoose to ignore undefined if we didn't include them, 
+    // but here we are extracting specific fields. 
+    // If frontend sends all current data + changes, we are good.
+    // If frontend sends only changes, we need to be careful with defaults overwriting.
+    // Assuming frontend sends full state or we merge. Mongoose findByIdAndUpdate with new fields.
+
+    const user = await User.findByIdAndUpdate(req.user.id, { $set: updateData }, { new: true }).select('-password');
+    res.json(user);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Signup
 router.post('/signup', async (req, res) => {
   try {

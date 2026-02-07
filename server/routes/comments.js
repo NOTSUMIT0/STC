@@ -3,11 +3,14 @@ import Comment from '../models/Comment.js';
 
 const router = express.Router();
 
+import authenticate from '../middleware/auth.middleware.js';
+
 // GET comments for a specific post
 router.get('/:postId', async (req, res) => {
   try {
     const comments = await Comment.find({ post: req.params.postId })
-      .sort({ createdAt: 1 }); // Oldest first usually better for conversations, or -1 for newest
+      .sort({ createdAt: 1 })
+      .populate('author', 'username avatarType avatarValue');
     res.json(comments);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -15,21 +18,20 @@ router.get('/:postId', async (req, res) => {
 });
 
 // POST a new comment
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
-    const { postId, content, parentCommentId, authorName, authorAvatar } = req.body;
+    const { postId, content, parentCommentId } = req.body;
 
     const comment = new Comment({
       post: postId,
       content,
       parentComment: parentCommentId || null,
-      author: {
-        username: authorName || 'Anonymous',
-        avatarSeed: authorAvatar || 'Felix',
-      },
+      author: req.user.id,
     });
 
     const newComment = await comment.save();
+    await newComment.populate('author', 'username avatarType avatarValue');
+
     res.status(201).json(newComment);
   } catch (err) {
     res.status(400).json({ message: err.message });

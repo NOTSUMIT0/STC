@@ -17,11 +17,21 @@ import {
 
 import { useLogout } from '../hooks/mutations/useAuth';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getAvatarUrl = (user: any) => {
+  if (user?.avatarType === 'upload' && user?.avatarValue) {
+    return `${API_URL}${user.avatarValue.startsWith('/') ? '' : '/'}${user.avatarValue}`;
+  }
+  const seed = user?.avatarValue || user?.username || 'Felix';
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+};
+
 const Dashboard = ({ user }: { user: any }) => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const userSeed = user?.username || 'Felix';
+  // const userSeed = user?.username || 'Felix'; // Removed in favor of getAvatarUrl
   const logoutMutation = useLogout();
 
   const handleLogout = () => {
@@ -46,9 +56,9 @@ const Dashboard = ({ user }: { user: any }) => {
     switch (activeTab) {
       case 'Roadmaps': return <Roadmaps />;
       case 'Resources': return <Resources />;
-      case 'Community': return <Community />;
+      case 'Community': return <Community user={user} />;
       case 'Settings': return <Settings />;
-      case 'Profile': return <Profile />;
+      case 'Profile': return <Profile user={user} />;
       default:
         return (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
@@ -100,7 +110,7 @@ const Dashboard = ({ user }: { user: any }) => {
               <div className="card bg-gradient-to-br from-neutral to-base-100 shadow-xl text-center p-6">
                 <div className="avatar mx-auto mb-4">
                   <div className="w-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userSeed}`} alt="avatar" />
+                    <img src={getAvatarUrl(user)} alt="avatar" />
                   </div>
                 </div>
                 <h3 className="font-bold text-lg">{user?.username}</h3>
@@ -202,7 +212,7 @@ const Dashboard = ({ user }: { user: any }) => {
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="avatar cursor-pointer hover:opacity-80 transition-opacity">
                 <div className="w-10 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-base-100">
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userSeed}`} alt="Profile" />
+                  <img src={getAvatarUrl(user)} alt="Profile" />
                 </div>
               </div>
               <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-200 rounded-box w-52 border border-white/5 mt-4">

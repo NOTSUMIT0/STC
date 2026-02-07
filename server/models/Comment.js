@@ -18,14 +18,9 @@ const commentSchema = new mongoose.Schema({
     maxlength: 1000,
   },
   author: {
-    username: {
-      type: String,
-      required: true,
-    },
-    avatarSeed: {
-      type: String,
-      default: 'Felix',
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,

@@ -32,14 +32,9 @@ const postSchema = new mongoose.Schema({
     },
   }],
   author: {
-    username: {
-      type: String,
-      required: true,
-    },
-    avatarSeed: {
-      type: String,
-      default: 'Felix',
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   },
   likes: [{ // Array of User IDs who upvoted
     type: mongoose.Schema.Types.ObjectId,

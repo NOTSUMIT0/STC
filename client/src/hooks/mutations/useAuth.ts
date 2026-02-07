@@ -33,6 +33,7 @@ export const useLogin = () => {
   });
 };
 
+
 export const useSignup = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -42,6 +43,23 @@ export const useSignup = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['authUser'] })
+    },
+    onError: (error: any) => {
+      console.log(error);
+    }
+  });
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: any) => {
+      const response = await api.put('/api/auth/me', data);
+      return response.data;
+    },
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(['authUser'], updatedUser);
+      queryClient.invalidateQueries({ queryKey: ['authUser'] });
     },
     onError: (error: any) => {
       console.log(error);
