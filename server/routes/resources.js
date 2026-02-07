@@ -43,7 +43,14 @@ const upload = multer({
 // GET all resources
 router.get('/', async (req, res) => {
   try {
-    const resources = await Resource.find().sort({ createdAt: -1 });
+    const { parentId } = req.query;
+    const query = { parentId: parentId || null }; // If parentId is missing/null, fetch root. 
+
+    // If parentId is 'null' string (from query params), treat as null object
+    if (parentId === 'null') query.parentId = null;
+
+    const resources = await Resource.find(query).sort({ type: 1, createdAt: -1 }); // Folders first (if 'folder' < 'link' alphabetically? No, 'f' comes before 'l'. We might need better sort)
+    // Actually 'folder' comes before 'link'. So sorting by type: 1 puts folders first.
     res.json(resources);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -53,7 +60,7 @@ router.get('/', async (req, res) => {
 // POST create resource
 router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const { title, type, description, url, tags, user, isPublic } = req.body;
+    const { title, type, description, url, tags, user, isPublic, parentId } = req.body;
     let resourceUrl = url;
 
     // If file uploaded, use file path as URL
@@ -65,6 +72,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     const newResource = new Resource({
       title,
       type, // 'link' or 'file' (or others)
+      parentId: parentId === 'null' ? null : parentId,
       description,
       url: resourceUrl,
       tags: tags ? tags.split(',').map(tag => tag.trim()) : [],

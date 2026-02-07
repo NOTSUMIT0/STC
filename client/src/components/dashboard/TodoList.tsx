@@ -27,7 +27,7 @@ const TodoList = () => {
   const activeCount = todos.filter(t => !t.done).length;
 
   return (
-    <div className="card bg-base-100 shadow-xl h-full border border-white/5 flex flex-col">
+    <div className="card bg-base-100 shadow-xl h-full border border-white/5 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="p-5 border-b border-white/5 bg-gradient-to-r from-base-100 to-base-200">
         <h3 className="font-bold text-lg flex justify-between items-center text-primary">
@@ -66,7 +66,7 @@ const TodoList = () => {
                 <div className="swap-off w-5 h-5 border-2 border-primary/50 rounded-full hover:border-primary transition-colors"></div>
               </label>
 
-              <span className={`flex-1 text-sm font-medium transition-all ${todo.done ? 'line-through decoration-2 decoration-gray-500 text-gray-500' : 'text-base-content'}`}>
+              <span className={`flex-1 text-sm font-medium transition-all break-words min-w-0 ${todo.done ? 'line-through decoration-2 decoration-gray-500 text-gray-500' : 'text-base-content'}`}>
                 {todo.text}
               </span>
 

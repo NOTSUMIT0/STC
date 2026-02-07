@@ -19,6 +19,9 @@ import { useLogout } from '../hooks/mutations/useAuth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+import CalendarWidget from '../components/dashboard/CalendarWidget';
+import TimeTableWidget from '../components/dashboard/TimeTableWidget';
+
 const getAvatarUrl = (user: any) => {
   if (user?.avatarType === 'upload' && user?.avatarValue) {
     return `${API_URL}${user.avatarValue.startsWith('/') ? '' : '/'}${user.avatarValue}`;
@@ -29,6 +32,7 @@ const getAvatarUrl = (user: any) => {
 
 const Dashboard = ({ user }: { user: any }) => {
   const [activeTab, setActiveTab] = useState('Overview');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   // const userSeed = user?.username || 'Felix'; // Removed in favor of getAvatarUrl
@@ -89,19 +93,9 @@ const Dashboard = ({ user }: { user: any }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="card bg-green-900/20 border border-green-500/30">
-                  <div className="card-body p-4">
-                    <div className="badge badge-success gap-2">Verified</div>
-                    <p className="mt-2 text-sm">Email verification completed.</p>
-                  </div>
-                </div>
-                <div className="card bg-blue-900/20 border border-blue-500/30">
-                  <div className="card-body p-4">
-                    <div className="badge badge-info gap-2">New</div>
-                    <p className="mt-2 text-sm">9 New Resources Added.</p>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-80">
+                <CalendarWidget onDateSelect={setSelectedDate} selectedDate={selectedDate} />
+                <TimeTableWidget />
               </div>
             </div>
 
@@ -123,14 +117,27 @@ const Dashboard = ({ user }: { user: any }) => {
               <div className="card bg-base-100 shadow-xl p-4">
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-bold text-sm">Roadmaps</span>
-                  <button className="btn btn-xs btn-ghost">View All</button>
+                  <button onClick={() => setActiveTab('Roadmaps')} className="btn btn-xs btn-ghost">View All</button>
                 </div>
                 <div className="space-y-3">
-                  {['Frontend', 'Backend', 'DevOps'].map((r) => (
-                    <div key={r} className="flex justify-between items-center text-xs p-2 hover:bg-base-200 rounded transition-colors cursor-pointer">
-                      <span>{r}</span>
-                      <span className="badge badge-xs badge-primary">Create</span>
-                    </div>
+                  {[
+                    { name: 'Frontend', url: 'https://roadmap.sh/frontend' },
+                    { name: 'Backend', url: 'https://roadmap.sh/backend' },
+                    { name: 'DevOps', url: 'https://roadmap.sh/devops' },
+                    { name: 'Full Stack', url: 'https://roadmap.sh/full-stack' },
+                    { name: 'AI Engineer', url: 'https://roadmap.sh/ai-data-scientist' },
+                    { name: 'Cyber Security', url: 'https://roadmap.sh/cyber-security' }
+                  ].map((r) => (
+                    <a
+                      key={r.name}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex justify-between items-center text-xs p-2 hover:bg-base-200 rounded transition-colors cursor-pointer group"
+                    >
+                      <span className="font-medium group-hover:text-primary transition-colors">{r.name}</span>
+                      <span className="badge badge-xs badge-primary">View</span>
+                    </a>
                   ))}
                 </div>
               </div>

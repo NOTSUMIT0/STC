@@ -1,7 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useUpdateProfile } from '../../hooks/mutations/useAuth';
 
-const AVATAR_SEEDS = ['Felix', 'Aneka', 'Zack', 'Midnight', 'Bandit', 'Bella', 'Buster', 'Coco', 'Daisy', 'Ginger'];
+// Expanded Avatar Seeds
+const AVATAR_SEEDS = [
+  'Felix', 'Aneka', 'Zoe', 'Marc', 'Trouble', 'Willow', 'Bear', 'Bandit',
+  'Mittens', 'Shadow', 'Tiger', 'Luna', 'Bella', 'Charlie', 'Max', 'Lucy',
+  'Leo', 'Molly', 'Simba', 'Loki', 'Pepper', 'Jack', 'Oreo', 'Daisy'
+];
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = ({ user }: { user: any }) => {
@@ -16,12 +22,10 @@ const Profile = ({ user }: { user: any }) => {
   const [inputHobby, setInputHobby] = useState('');
 
   // Avatar State
-  const [avatarType, setAvatarType] = useState<'seed' | 'upload'>('seed');
-  const [avatarValue, setAvatarValue] = useState('');
-  const [previewUrl, setPreviewUrl] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarSeed, setAvatarSeed] = useState('Felix');
 
   const updateProfileMutation = useUpdateProfile();
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -33,20 +37,11 @@ const Profile = ({ user }: { user: any }) => {
         university: user.university || '',
       });
       setHobbies(user.hobbies || []);
-      setAvatarType(user.avatarType || 'seed');
-      setAvatarValue(user.avatarValue || user.username || 'Felix'); // Default to username seed if migrated
 
-      // Init preview
-      if (user.avatarType === 'upload' && user.avatarValue) {
-        if (user.avatarValue.startsWith('data:')) {
-          setPreviewUrl(user.avatarValue);
-        } else {
-          const path = user.avatarValue.startsWith('/') ? user.avatarValue : `/${user.avatarValue}`;
-          setPreviewUrl(`${API_URL}${path}`);
-        }
-      } else {
-        const seed = user.avatarValue || user.username || 'Felix';
-        setPreviewUrl(`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`);
+      if (user.avatarType === 'seed' && user.avatarValue) {
+        setAvatarSeed(user.avatarValue);
+      } else if (user.username) {
+        setAvatarSeed(user.username);
       }
     }
   }, [user]);
@@ -69,25 +64,6 @@ const Profile = ({ user }: { user: any }) => {
     setHobbies(hobbies.filter((_, i) => i !== index));
   };
 
-  const handleAvatarSelect = (seed: string) => {
-    setAvatarType('seed');
-    setAvatarValue(seed);
-    setPreviewUrl(`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`);
-    // Clear file input if any
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarType('upload');
-      // Create object URL for preview
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-      // We don't set avatarValue string here, we use the file ref during submit
-    }
-  };
-
   const handleSubmit = () => {
     const data = new FormData();
     data.append('firstName', formData.firstName);
@@ -96,87 +72,71 @@ const Profile = ({ user }: { user: any }) => {
     data.append('fieldOfStudy', formData.fieldOfStudy);
     data.append('university', formData.university);
     data.append('hobbies', JSON.stringify(hobbies));
-    data.append('avatarType', avatarType);
+    data.append('avatarType', 'seed');
+    data.append('avatarValue', avatarSeed);
 
-    if (avatarType === 'seed') {
-      data.append('avatarValue', avatarValue);
-    } else if (avatarType === 'upload' && fileInputRef.current?.files?.[0]) {
-      // New file upload
-      data.append('avatar', fileInputRef.current.files[0]);
-    } else {
-      // Keep existing upload (if user didn't change it but is in upload mode)
-      // We can send the existing path map, OR backend handles "if no file and type upload, keep existing"
-      // Our backend logic: "If file uploaded... else if avatarValue && type seed"
-      // So if we are in 'upload' mode but no NEW file, we technically want to keep old value.
-      // But if we switched from seed -> upload -> back to old upload... tricky without re-selecting.
-      // Current UI: If type is upload and no new file, we rely on backend not overwriting if field missing?
-      // Backend: `if (req.file) ... else if (avatarValue && type=='seed')`
-      // So if we send type='upload' and NO file, backend does nothing to avatarValue. Good.
-    }
-
-    updateProfileMutation.mutate(data);
+    updateProfileMutation.mutate(data, {
+      onSuccess: () => {
+        setMessage({ type: 'success', text: 'Profile updated successfully!' });
+        setTimeout(() => setMessage(null), 3000);
+      },
+      onError: () => {
+        setMessage({ type: 'error', text: 'Failed to update profile.' });
+      }
+    });
   };
 
   return (
-    <div className="animate-fade-in-up max-w-5xl mx-auto">
+    <div className="animate-fade-in-up max-w-6xl mx-auto pb-20">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Public Profile</h2>
+          <p className="text-gray-400 mt-1">Customize how your profile looks to the community.</p>
+        </div>
+
+        {message && (
+          <div className={`badge ${message.type === 'success' ? 'badge-success' : 'badge-error'} gap-2 px-4 py-3 h-auto`}>
+            {message.text}
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Avatar & Summary */}
+        {/* Left Column: Avatar Preview & Selection */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="card bg-[#1A1A1B] border border-white/5 shadow-xl overflow-hidden sticky top-6">
-            <div className="h-24 bg-gradient-to-r from-primary/20 to-secondary/20"></div>
-            <div className="px-6 pb-6 text-center -mt-12">
-              <div className="avatar indicator mx-auto">
-                <span className="indicator-item badge badge-primary font-bold">Pro</span>
-                <div className="w-28 rounded-full ring-4 ring-[#1A1A1B] bg-base-300">
-                  <img src={previewUrl} alt="Avatar" className="object-cover" />
+          <div className="card bg-[#1A1A1B] border border-white/5 shadow-xl">
+            <div className="card-body items-center text-center">
+              <span className="badge badge-primary font-bold mb-4">Preview</span>
+              <div className="avatar mb-4">
+                <div className="w-40 rounded-full ring-4 ring-primary ring-offset-4 ring-offset-[#1A1A1B] bg-[#2b2d31]">
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} alt="avatar" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold mt-4 text-white">
-                {formData.firstName && formData.lastName ? `${formData.firstName} ${formData.lastName}` : user.username}
+              <h2 className="text-2xl font-bold text-white">
+                {formData.firstName && formData.lastName ? `${formData.firstName} ${formData.lastName}` : (user?.username || 'User')}
               </h2>
-              <p className="text-sm text-primary font-medium">{formData.fieldOfStudy || 'Student'}</p>
-              <p className="text-xs text-gray-500 mt-1">{formData.university}</p>
-
-              <div className="divider my-4"></div>
-
-              <div className="text-left text-sm text-gray-400 italic">
-                "{formData.bio || 'No bio yet...'}"
-              </div>
+              <p className="text-primary font-medium">{formData.fieldOfStudy || 'Student'}</p>
+              <div className="divider my-2"></div>
+              <p className="text-sm text-gray-400 italic line-clamp-3">"{formData.bio || 'Your bio will appear here...'}"</p>
             </div>
           </div>
 
-          {/* Avatar Selector Panel */}
-          <div className="card bg-[#1A1A1B] border border-white/5 shadow-xl p-4">
-            <h3 className="font-bold text-gray-200 mb-4 text-sm uppercase tracking-wider">Customize Avatar</h3>
-
-            <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-2">Choose a preset:</p>
-              <div className="grid grid-cols-5 gap-2">
-                {AVATAR_SEEDS.map(seed => (
+          <div className="card bg-[#1A1A1B] border border-white/5 shadow-xl">
+            <div className="card-body">
+              <h3 className="font-bold text-gray-200 mb-4 uppercase text-xs tracking-wider">Choose Avatar</h3>
+              <div className="grid grid-cols-4 gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                {AVATAR_SEEDS.map((seed) => (
                   <button
                     key={seed}
-                    onClick={() => handleAvatarSelect(seed)}
-                    className={`rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${avatarType === 'seed' && avatarValue === seed ? 'border-primary ring-2 ring-primary/30' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                    onClick={() => setAvatarSeed(seed)}
+                    className={`avatar rounded-full p-1 border-2 transition-all hover:scale-110 ${avatarSeed === seed ? 'border-primary bg-primary/20' : 'border-transparent hover:border-white/20'}`}
                   >
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`} className="w-full bg-gray-800" />
+                    <div className="w-full rounded-full bg-[#2b2d31]">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`} alt={seed} />
+                    </div>
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="divider text-xs text-gray-600">OR</div>
-
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text text-xs text-gray-500">Upload your own picture</span>
-              </label>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept="image/*"
-                className="file-input file-input-bordered file-input-primary file-input-sm w-full"
-              />
             </div>
           </div>
         </div>
@@ -186,10 +146,7 @@ const Profile = ({ user }: { user: any }) => {
           <div className="card bg-[#1A1A1B] border border-white/5 shadow-xl">
             <div className="card-body">
               <div className="flex justify-between items-center border-b border-white/5 pb-4 mb-6">
-                <div>
-                  <h3 className="font-bold text-xl text-white">Edit Profile</h3>
-                  <p className="text-xs text-gray-500">Update your personal information</p>
-                </div>
+                <h3 className="font-bold text-xl text-white">Edit Details</h3>
                 <button
                   onClick={handleSubmit}
                   className={`btn btn-primary px-8 ${updateProfileMutation.isPending ? 'loading' : ''}`}
@@ -199,36 +156,42 @@ const Profile = ({ user }: { user: any }) => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="form-control">
-                  <label className="label text-xs font-semibold uppercase text-gray-500">First Name</label>
-                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10]" placeholder="e.g. Alex" />
-                </div>
-                <div className="form-control">
-                  <label className="label text-xs font-semibold uppercase text-gray-500">Last Name</label>
-                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10]" placeholder="e.g. Student" />
+              <div className="grid grid-cols-1 gap-6">
+
+                {/* Names */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="form-control hover:opacity-100 transition-opacity">
+                    <label className="label text-xs font-bold uppercase text-gray-500 mb-1">First Name</label>
+                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10] text-white" placeholder="e.g. Alex" />
+                  </div>
+                  <div className="form-control">
+                    <label className="label text-xs font-bold uppercase text-gray-500 mb-1">Last Name</label>
+                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10] text-white" placeholder="e.g. Student" />
+                  </div>
                 </div>
 
-                <div className="form-control md:col-span-2">
-                  <label className="label text-xs font-semibold uppercase text-gray-500">Bio</label>
-                  <textarea name="bio" value={formData.bio} onChange={handleChange} className="textarea textarea-bordered h-32 focus:textarea-primary bg-[#0f0f10] leading-relaxed" placeholder="Tell the community about yourself..."></textarea>
-                  <label className="label">
-                    <span className="label-text-alt text-gray-600">Markdown supported</span>
-                  </label>
+                {/* Bio */}
+                <div className="form-control">
+                  <label className="label text-xs font-bold uppercase text-gray-500 mb-1">Bio</label>
+                  <textarea name="bio" value={formData.bio} onChange={handleChange} className="textarea textarea-bordered h-32 focus:textarea-primary bg-[#0f0f10] text-white leading-relaxed resize-none" placeholder="Tell the community about yourself..."></textarea>
                 </div>
 
-                <div className="form-control">
-                  <label className="label text-xs font-semibold uppercase text-gray-500">Field of Study</label>
-                  <input type="text" name="fieldOfStudy" value={formData.fieldOfStudy} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10]" placeholder="e.g. Computer Science" />
-                </div>
-                <div className="form-control">
-                  <label className="label text-xs font-semibold uppercase text-gray-500">University / College</label>
-                  <input type="text" name="university" value={formData.university} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10]" placeholder="e.g. Stanford University" />
+                {/* Education */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="form-control">
+                    <label className="label text-xs font-bold uppercase text-gray-500 mb-1">Field of Study</label>
+                    <input type="text" name="fieldOfStudy" value={formData.fieldOfStudy} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10] text-white" placeholder="e.g. Computer Science" />
+                  </div>
+                  <div className="form-control">
+                    <label className="label text-xs font-bold uppercase text-gray-500 mb-1">University / College</label>
+                    <input type="text" name="university" value={formData.university} onChange={handleChange} className="input input-bordered focus:input-primary bg-[#0f0f10] text-white" placeholder="e.g. Stanford University" />
+                  </div>
                 </div>
 
-                <div className="form-control md:col-span-2">
-                  <label className="label text-xs font-semibold uppercase text-gray-500">Hobbies & Interests</label>
-                  <div className="p-3 border border-[#343536] rounded-lg bg-[#0f0f10] min-h-[3rem] flex flex-wrap gap-2 focus-within:border-primary transition-colors">
+                {/* Hobbies */}
+                <div className="form-control">
+                  <label className="label text-xs font-bold uppercase text-gray-500 mb-1">Hobbies & Interests</label>
+                  <div className="p-3 border border-[#343536] rounded-lg bg-[#0f0f10] min-h-[3rem] flex flex-wrap gap-2 focus-within:border-primary transition-all">
                     {hobbies.map((hobby, i) => (
                       <span key={i} className="badge badge-secondary gap-1 pr-1 pl-3 py-3">
                         {hobby}
@@ -237,7 +200,7 @@ const Profile = ({ user }: { user: any }) => {
                     ))}
                     <input
                       type="text"
-                      className="bg-transparent outline-none flex-1 min-w-[120px] text-sm"
+                      className="bg-transparent outline-none flex-1 min-w-[120px] text-sm text-white placeholder:text-gray-600"
                       placeholder={hobbies.length === 0 ? "Type something and press Enter..." : "Add another..."}
                       value={inputHobby}
                       onChange={(e) => setInputHobby(e.target.value)}
@@ -248,6 +211,7 @@ const Profile = ({ user }: { user: any }) => {
                     <span className="label-text-alt text-gray-600">Press Enter to add tags</span>
                   </label>
                 </div>
+
               </div>
             </div>
           </div>
@@ -257,7 +221,7 @@ const Profile = ({ user }: { user: any }) => {
   );
 };
 
-// Simple Icon component helper since we removed imports to make replacing easier
+// Simple Icon component helper
 const XMarkIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
     <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
@@ -265,4 +229,3 @@ const XMarkIcon = ({ className }: { className?: string }) => (
 );
 
 export default Profile;
-

@@ -11,9 +11,14 @@ const resourceSchema = new mongoose.Schema({
     required: [true, 'Please add a title'],
     trim: true,
   },
+  parentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Resource',
+    default: null,
+  },
   type: {
     type: String,
-    enum: ['link', 'note', 'library', 'video', 'file', 'other'],
+    enum: ['link', 'note', 'library', 'video', 'file', 'folder', 'other'],
     default: 'link',
   },
   description: {

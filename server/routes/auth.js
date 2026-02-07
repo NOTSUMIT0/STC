@@ -100,7 +100,7 @@ router.post('/signup', async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site cookies on Render
       maxAge: 3600000 // 1 hour
     });
 
@@ -143,6 +143,27 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error(`Login error: ${error.message}`);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Change Password
+router.put('/password', authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid current password' });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -26,10 +26,13 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+
+    // Check if origin is allowed explicitly or matches localhost pattern
+    if (allowedOrigins.indexOf(origin) !== -1 || /^http:\/\/localhost:\d+$/.test(origin)) {
+      return callback(null, true);
     }
-    return callback(null, true);
+
+    return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
   },
   credentials: true
 }));

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -7,6 +8,13 @@ import { useCheckAuth } from './hooks/queries/useAuth';
 
 function App() {
   const { data: user, isLoading } = useCheckAuth();
+
+
+  useEffect(() => {
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'sunset';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-base-300">Loading...</div>;
 
