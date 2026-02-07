@@ -8,7 +8,7 @@ const AVATAR_SEEDS = [
   'Leo', 'Molly', 'Simba', 'Loki', 'Pepper', 'Jack', 'Oreo', 'Daisy'
 ];
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+//const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = ({ user }: { user: any }) => {
   const [formData, setFormData] = useState({
