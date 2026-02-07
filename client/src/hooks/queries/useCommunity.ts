@@ -34,3 +34,15 @@ export const useFetchPosts = (communityId?: string, filterMode: string = 'hot') 
     },
   });
 };
+
+export const useFetchPost = (postId: string | null) => {
+  return useQuery({
+    queryKey: ['post', postId],
+    queryFn: async () => {
+      if (!postId) return null;
+      const response = await api.get(`/api/posts/${postId}`);
+      return response.data;
+    },
+    enabled: !!postId,
+  });
+};

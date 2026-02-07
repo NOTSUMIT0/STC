@@ -382,7 +382,7 @@ const Community = ({ user }: { user: any }) => {
     setExpandedComments(newSet);
   };
 
-  const isUserMember = (comm: CommunityType | undefined) => comm?.members?.includes(user._id);
+  const isUserMember = (comm: CommunityType | undefined) => comm?.members?.some((m: any) => (typeof m === 'string' ? m : m._id) === user._id);
   // const visiblePosts = activeCommunity ? posts : posts.filter(p => !p.community || (p.community && isUserMember(p.community as CommunityType))); // Unused
   const isMod = activeCommunity?.creator === user._id;
 

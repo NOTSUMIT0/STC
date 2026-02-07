@@ -51,6 +51,20 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
+// GET single post by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate('author', 'username avatarType avatarValue')
+      .populate('community', 'name members creator');
+
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST create a new post
 router.post('/', authenticate, upload.single('image'), async (req, res) => {
   try {
@@ -108,8 +122,8 @@ router.put('/:id/like', async (req, res) => {
     if (!Array.isArray(post.likes)) post.likes = [];
     if (!Array.isArray(post.dislikes)) post.dislikes = [];
 
-    const likeIndex = post.likes.indexOf(userId);
-    const dislikeIndex = post.dislikes.indexOf(userId);
+    const likeIndex = post.likes.findIndex(id => id.toString() === userId);
+    const dislikeIndex = post.dislikes.findIndex(id => id.toString() === userId);
 
     if (action === 'upvote') {
       if (likeIndex === -1) {

@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
+import PostPage from './pages/PostPage';
 import { useCheckAuth } from './hooks/queries/useAuth';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
           <Route path="/signup" element={user ? <Navigate to="/dashboard" /> : <Signup />} />
           <Route path="/dashboard/*" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />
+          <Route path="/post/:id" element={user ? <PostPage user={user} /> : <Navigate to="/signup" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
