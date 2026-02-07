@@ -12,6 +12,7 @@ import {
   BookOpenIcon,
   UserGroupIcon,
   Cog6ToothIcon,
+  AcademicCapIcon,
 } from '@heroicons/react/24/outline';
 
 import { useLogout } from '../hooks/mutations/useAuth';
@@ -182,12 +183,12 @@ const Dashboard = ({ user }: { user: any }) => {
         <div className="max-w-[1800px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
 
           {/* Logo Section */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-xl flex items-center justify-center shadow-lg shadow-primary/25">
-              <span className="text-xl font-bold text-white">S</span>
+          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setActiveTab('Overview')}>
+            <div className="w-10 h-10 bg-gradient-to-tr from-primary to-accent rounded-xl flex items-center justify-center shadow-lg shadow-primary/25 text-white transform group-hover:scale-105 transition-transform duration-300">
+              <AcademicCapIcon className="w-6 h-6" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">STC</span>
+              <span className="text-2xl font-black tracking-tight text-base-content group-hover:text-primary transition-colors">STC</span>
               <span className="text-[10px] uppercase tracking-widest text-primary font-bold">Student Platform</span>
             </div>
           </div>

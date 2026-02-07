@@ -161,9 +161,9 @@ const Settings = () => {
                 <h3 className="card-title text-2xl mb-8 text-white">Notification Preferences</h3>
 
                 <div className="space-y-8 max-w-2xl">
-                  <div className="form-control">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5">
-                      <div className="flex flex-col gap-1">
+                  <div className="form-control w-full">
+                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5 w-full">
+                      <div className="flex flex-col gap-1 flex-1">
                         <span className="label-text font-bold text-lg text-gray-200">Email Notifications</span>
                         <span className="label-text-alt text-gray-500">Receive emails about new features and roadmaps</span>
                       </div>
@@ -171,9 +171,9 @@ const Settings = () => {
                     </label>
                   </div>
 
-                  <div className="form-control">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5">
-                      <div className="flex flex-col gap-1">
+                  <div className="form-control w-full">
+                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5 w-full">
+                      <div className="flex flex-col gap-1 flex-1">
                         <span className="label-text font-bold text-lg text-gray-200">Community Replies</span>
                         <span className="label-text-alt text-gray-500">Get notified when someone replies to your post</span>
                       </div>
@@ -181,9 +181,9 @@ const Settings = () => {
                     </label>
                   </div>
 
-                  <div className="form-control">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5">
-                      <div className="flex flex-col gap-1">
+                  <div className="form-control w-full">
+                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5 w-full">
+                      <div className="flex flex-col gap-1 flex-1">
                         <span className="label-text font-bold text-lg text-gray-200">Mentions</span>
                         <span className="label-text-alt text-gray-500">Get notified when you are mentioned @user</span>
                       </div>
