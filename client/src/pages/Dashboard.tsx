@@ -12,10 +12,10 @@ import {
   BookOpenIcon,
   UserGroupIcon,
   Cog6ToothIcon,
-  BellIcon
 } from '@heroicons/react/24/outline';
 
 import { useLogout } from '../hooks/mutations/useAuth';
+import NotificationDropdown from '../components/dashboard/NotificationDropdown';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -211,10 +211,7 @@ const Dashboard = ({ user }: { user: any }) => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-            <button className="btn btn-ghost btn-circle btn-sm text-gray-400 hover:text-white relative">
-              <BellIcon className="w-6 h-6" />
-              <span className="badge badge-error badge-xs absolute top-1 right-1"></span>
-            </button>
+            <NotificationDropdown user={user} />
 
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="avatar cursor-pointer hover:opacity-80 transition-opacity">
@@ -253,7 +250,7 @@ const Dashboard = ({ user }: { user: any }) => {
         {renderContent()}
       </div>
 
-      <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} />
+      <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} user={user} />
     </div>
   );
 };

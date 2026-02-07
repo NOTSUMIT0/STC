@@ -46,7 +46,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/communities', communityRoutes);
+app.use('/api/communities', communityRoutes);
 app.use('/api/comments', commentRoutes);
+import supportRoutes from './routes/support.js';
+app.use('/api/support', supportRoutes);
 
 // Database Connection
 console.log('Attempting to connect to MongoDB...');
