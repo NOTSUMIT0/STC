@@ -8,7 +8,7 @@ export const usePostComment = () => {
       const response = await api.post('/api/comments', data);
       return response.data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['comments', variables.postId] });
     },
   });
@@ -21,7 +21,7 @@ export const useLikeComment = () => {
       const response = await api.put(`/api/comments/${commentId}/like`, { userId, action });
       return response.data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       // We might need postId to invalidate correct query. 
       // If we don't have it, we might need to invalidate all comments or pass it.
       // 'variables' here is the argument to mutate.

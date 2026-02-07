@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { DocumentTextIcon, VideoCameraIcon, LinkIcon, XMarkIcon, EllipsisVerticalIcon, GlobeAltIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, LinkIcon, XMarkIcon, EllipsisVerticalIcon, GlobeAltIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 interface Resource {
   _id: string;

@@ -7,7 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: login } = useLogin();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
