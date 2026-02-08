@@ -175,7 +175,7 @@ const Resources = () => {
 
   const openResourceLink = (url: string) => {
     if (!url) return;
-    const finalUrl = url.startsWith('/') ? `${API_URL}${url}` : url;
+    const finalUrl = url.startsWith('http') ? url : `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
     window.open(finalUrl, '_blank', 'noopener,noreferrer');
   };
 

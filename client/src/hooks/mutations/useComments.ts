@@ -21,16 +21,59 @@ export const useLikeComment = () => {
       const response = await api.put(`/api/comments/${commentId}/like`, { userId, action });
       return response.data;
     },
-    onSuccess: () => {
-      // We might need postId to invalidate correct query. 
-      // If we don't have it, we might need to invalidate all comments or pass it.
-      // 'variables' here is the argument to mutate.
-      // The caller needs to ensure invalidation happens for the right UI update.
-      // Since comments query is by postId, we need to know the postId.
-      // The API for like doesn't take postId.
-      // We can invalidate all 'comments' queries or try to pass postId in context.
-      // For now, let's invalidate all 'comments' or just optimistically update in component.
-      // Safest is invalidate all comments queries.
+    onMutate: async ({ commentId, userId, action }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['comments'] });
+
+      // Snapshot previous value
+      const previousComments = queryClient.getQueriesData({ queryKey: ['comments'] });
+
+      // Optimistically update
+      queryClient.setQueriesData({ queryKey: ['comments'] }, (old: any) => {
+        if (!old || !Array.isArray(old)) return old;
+        return old.map((comment: any) => {
+          // Helper to recursively update comments (since they can be nested or flat, here they seem flat from backend but structured in UI)
+          // The query returns a flat list from backend: router.get('/:postId') -> Comment.find({...})
+          // So we just map the array.
+          if (comment._id === commentId) {
+            let likes = [...(comment.likes || [])];
+            let dislikes = [...(comment.dislikes || [])];
+
+            const likeIndex = likes.findIndex((id: any) => id.toString() === userId.toString());
+            const dislikeIndex = dislikes.findIndex((id: any) => id.toString() === userId.toString());
+
+            if (action === 'upvote') {
+              if (likeIndex === -1) {
+                likes.push(userId);
+                if (dislikeIndex !== -1) dislikes.splice(dislikeIndex, 1);
+              } else {
+                likes.splice(likeIndex, 1); // Toggle off
+              }
+            } else if (action === 'downvote') {
+              if (dislikeIndex === -1) {
+                dislikes.push(userId);
+                if (likeIndex !== -1) likes.splice(likeIndex, 1);
+              } else {
+                dislikes.splice(dislikeIndex, 1); // Toggle off
+              }
+            }
+            return { ...comment, likes, dislikes };
+          }
+          return comment;
+        });
+      });
+
+      return { previousComments };
+    },
+    onError: (err, newTodo, context) => {
+      // Rollback
+      if (context?.previousComments) {
+        context.previousComments.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['comments'] });
     },
   });

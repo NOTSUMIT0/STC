@@ -43,7 +43,7 @@ router.get('/', authenticate, async (req, res) => {
       .sort(sortOption)
       .limit(15) // Performance limit
       .populate('author', 'username avatarType avatarValue')
-      .populate('community', 'name members creator'); // Need members and creator for permissions
+      .populate('community', 'name creator icon'); // Optimized: Removed members (too large)
 
     res.json(posts);
   } catch (err) {
@@ -95,7 +95,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       title,
       content,
       community: communityId,
-      image: req.file ? fileToBase64(req.file) : null,
+      image: req.file ? req.file.path : null, // Cloudinary URL
       options,
       author: req.user.id,
     });

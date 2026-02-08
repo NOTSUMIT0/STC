@@ -197,7 +197,7 @@ const PostPage = ({ user }: { user: any }) => {
               {post.type === 'image' && post.image && (
                 <div className="bg-black border border-[#343536] rounded overflow-hidden mb-6 max-h-[600px] flex justify-center">
                   <img
-                    src={post.image.startsWith('data:') ? post.image : (post.image.startsWith('http') ? post.image : `${API_URL}${post.image.startsWith('/') ? '' : '/'}${post.image}`)}
+                    src={post.image.startsWith('http') || post.image.startsWith('data:') ? post.image : `${API_URL}${post.image}`}
                     className="object-contain"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />

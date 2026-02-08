@@ -250,6 +250,13 @@ const Community = ({ user }: { user: any }) => {
   const [editCommIcon, setEditCommIcon] = useState<File | null>(null);
   const [editCommBanner, setEditCommBanner] = useState<File | null>(null);
 
+  // Toast State
+  const [toast, setToast] = useState<{ msg: string, type: 'success' | 'error' | 'info' } | null>(null);
+  const showToast = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleCreatePost = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (!postTitle) return alert('Title is required');
@@ -262,6 +269,14 @@ const Community = ({ user }: { user: any }) => {
 
     const targetCommId = activeCommunity ? activeCommunity._id : (communities.length > 0 ? communities[0]._id : null);
     if (!targetCommId) return alert("Select a community!");
+
+    // VALIDATION: Check if user is member of the selected community
+    const targetComm = communities.find(c => c._id === targetCommId);
+    if (targetComm && !isUserMember(targetComm)) {
+      showToast(`You must join c/${targetComm.name} to post!`, 'error');
+      return;
+    }
+
     formData.append('communityId', targetCommId);
 
     if (postContent) formData.append('content', postContent);
@@ -398,7 +413,7 @@ const Community = ({ user }: { user: any }) => {
           <div className="flex justify-between items-center mb-2 px-4"><span className="text-[10px] font-bold text-gray-500 tracking-widest">COMMUNITIES</span><button onClick={() => setIsCommunityModalOpen(true)}><PlusIcon className="w-5 h-5 hover:bg-[#272729] rounded" /></button></div>
           {communities.map(c => (
             <button key={c._id} onClick={() => setActiveCommunity(c)} className={`flex items-center gap-3 px-6 py-2 transition-all w-full text-left ${activeCommunity?._id === c._id ? 'bg-[#272729] border-r-4 border-gray-200' : 'hover:bg-[#272729]'}`}>
-              <img src={c.icon.startsWith('/') ? `${API_URL}${c.icon}` : `https://api.dicebear.com/7.x/initials/svg?seed=${c.name}`} className="w-6 h-6 rounded-full" />
+              <img src={c.icon.startsWith('http') ? c.icon : `${API_URL}${c.icon}`} className="w-6 h-6 rounded-full" />
               <span className="truncate text-sm">{c.name}</span>
             </button>
           ))}
@@ -409,12 +424,12 @@ const Community = ({ user }: { user: any }) => {
           {activeCommunity ? (
             <div className="mb-4">
               <div className="h-48 w-full bg-[#33a8ff] relative overflow-hidden">
-                {activeCommunity.banner && <img src={`${API_URL}${activeCommunity.banner}`} className="w-full h-full object-cover" />}
+                {activeCommunity.banner && <img src={activeCommunity.banner.startsWith('http') ? activeCommunity.banner : `${API_URL}${activeCommunity.banner}`} className="w-full h-full object-cover" />}
               </div>
               <div className="bg-[#1A1A1B] px-4 pb-4">
                 <div className="max-w-5xl mx-auto relative flex items-start">
                   <div className="w-20 h-20 rounded-full border-4 border-[#1A1A1B] bg-white -mt-10 overflow-hidden relative z-10">
-                    <img src={activeCommunity.icon.startsWith('/') ? `${API_URL}${activeCommunity.icon}` : `https://api.dicebear.com/7.x/initials/svg?seed=${activeCommunity.name}`} className="w-full h-full object-cover" />
+                    <img src={activeCommunity.icon.startsWith('http') ? activeCommunity.icon : (activeCommunity.icon.startsWith('/') ? `${API_URL}${activeCommunity.icon}` : `https://api.dicebear.com/7.x/initials/svg?seed=${activeCommunity.name}`)} className="w-full h-full object-cover" />
                   </div>
                   <div className="ml-4 mt-2 flex-1 flex items-start justify-between">
                     <div>
@@ -429,9 +444,15 @@ const Community = ({ user }: { user: any }) => {
                       {/* Join/Leave Logic */}
                       {!isMod && (
                         !isUserMember(activeCommunity) ? (
-                          <button className="btn btn-sm rounded-full btn-primary" onClick={() => handleJoinLeave(activeCommunity._id, 'join')}>Join</button>
+                          <button className="btn btn-sm rounded-full btn-primary" onClick={() => handleJoinLeave(activeCommunity._id, 'join')} disabled={joinLeaveCommunityMutation.isPending}>
+                            {joinLeaveCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                            Join
+                          </button>
                         ) : (
-                          <button className="btn btn-sm rounded-full btn-outline hover:bg-error hover:border-error hover:text-white" onClick={() => handleJoinLeave(activeCommunity._id, 'leave')}>Joined</button>
+                          <button className="btn btn-sm rounded-full btn-outline hover:bg-error hover:border-error hover:text-white" onClick={() => handleJoinLeave(activeCommunity._id, 'leave')} disabled={joinLeaveCommunityMutation.isPending}>
+                            {joinLeaveCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                            Joined
+                          </button>
                         )
                       )}
 
@@ -460,7 +481,10 @@ const Community = ({ user }: { user: any }) => {
               {activeCommunity && !isUserMember(activeCommunity) && !isMod ? (
                 <div className="bg-[#1A1A1B] border border-[#343536] p-4 rounded flex items-center justify-between gap-2">
                   <span className="font-bold text-gray-400">Join c/{activeCommunity.name} to start posting!</span>
-                  <button className="btn btn-sm btn-primary rounded-full" onClick={() => handleJoinLeave(activeCommunity._id, 'join')}>Join Community</button>
+                  <button className="btn btn-sm btn-primary rounded-full" onClick={() => handleJoinLeave(activeCommunity._id, 'join')} disabled={joinLeaveCommunityMutation.isPending}>
+                    {joinLeaveCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                    Join Community
+                  </button>
                 </div>
               ) : (
                 <div className="bg-[#1A1A1B] border border-[#343536] p-2 rounded flex items-center gap-2 cursor-pointer hover:border-gray-500 transition-colors" onClick={() => setIsPostModalOpen(true)}>
@@ -525,7 +549,7 @@ const Community = ({ user }: { user: any }) => {
                           {post.type === 'image' && post.image && (
                             <div className="bg-black border border-[#343536] rounded overflow-hidden mb-4 max-h-[500px] flex justify-center">
                               <img
-                                src={post.image.startsWith('data:') ? post.image : (post.image.startsWith('http') ? post.image : `${API_URL}${post.image.startsWith('/') ? '' : '/'}${post.image}`)}
+                                src={post.image.startsWith('http') || post.image.startsWith('data:') ? post.image : `${API_URL}${post.image}`}
                                 className="object-contain"
                                 onError={(e) => { e.currentTarget.style.display = 'none'; }} // Hide if fails (missing local file)
                               />
@@ -608,7 +632,10 @@ const Community = ({ user }: { user: any }) => {
                       <label className="text-xs font-bold block mb-1">Update Banner</label>
                       <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-[#272729]" onChange={e => setEditCommBanner(e.target.files?.[0] || null)} />
                     </div>
-                    <div className="flex justify-end gap-2 mt-4"><button className="btn btn-primary" onClick={handleEditCommunity}>Save Changes</button></div>
+                    <div className="flex justify-end gap-2 mt-4"><button className="btn btn-primary" onClick={handleEditCommunity} disabled={editCommunityMutation.isPending}>
+                      {editCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                      Save Changes
+                    </button></div>
                   </>
                 ) : (
                   <>
@@ -624,7 +651,10 @@ const Community = ({ user }: { user: any }) => {
                       <label className="text-xs font-bold block mb-1">Banner (Optional)</label>
                       <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-[#272729]" onChange={e => setNewCommBanner(e.target.files?.[0] || null)} />
                     </div>
-                    <div className="flex justify-end gap-2 mt-4"><button className="btn btn-primary" onClick={handleCreateCommunity}>Create Community</button></div>
+                    <div className="flex justify-end gap-2 mt-4"><button className="btn btn-primary" onClick={handleCreateCommunity} disabled={createCommunityMutation.isPending}>
+                      {createCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                      Create Community
+                    </button></div>
                   </>
                 )}
               </div>
@@ -693,7 +723,10 @@ const Community = ({ user }: { user: any }) => {
                   </div>
                 )}
 
-                <div className="mt-4 flex justify-end"><button className="btn btn-primary" onClick={(e) => handleCreatePost(e)}>Post</button></div>
+                <div className="mt-4 flex justify-end"><button className="btn btn-primary" onClick={(e) => handleCreatePost(e)} disabled={createPostMutation.isPending}>
+                  {createPostMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                  Post
+                </button></div>
               </div>
             </div>
           </div>
@@ -708,12 +741,23 @@ const Community = ({ user }: { user: any }) => {
               <div className="p-4">
                 <input className="input input-bordered w-full mb-2 bg-[#272729]" placeholder="Title" value={editTitle} onChange={e => setEditTitle(e.target.value)} />
                 <textarea className="textarea textarea-bordered w-full h-32 bg-[#272729]" placeholder="Content" value={editContent} onChange={e => setEditContent(e.target.value)}></textarea>
-                <div className="mt-4 flex justify-end"><button className="btn btn-primary" onClick={handleUpdatePost}>Save Changes</button></div>
+                <div className="mt-4 flex justify-end"><button className="btn btn-primary" onClick={handleUpdatePost} disabled={updatePostMutation.isPending}>
+                  {updatePostMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                  Save Changes
+                </button></div>
               </div>
             </div>
           </div>
         )
       }
+      {/* Toast Notification */}
+      {toast && (
+        <div className="toast toast-end toast-bottom z-[9999]">
+          <div className={`alert ${toast.type === 'error' ? 'alert-error' : toast.type === 'success' ? 'alert-success' : 'alert-info'} text-white`}>
+            <span>{toast.msg}</span>
+          </div>
+        </div>
+      )}
     </div >
   );
 };

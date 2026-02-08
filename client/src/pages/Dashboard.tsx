@@ -25,7 +25,9 @@ import TimeTableWidget from '../components/dashboard/TimeTableWidget';
 
 const getAvatarUrl = (user: any) => {
   if (user?.avatarType === 'upload' && user?.avatarValue) {
-    return `${API_URL}${user.avatarValue.startsWith('/') ? '' : '/'}${user.avatarValue}`;
+    return user.avatarValue.startsWith('http') || user.avatarValue.startsWith('data:')
+      ? user.avatarValue
+      : `${API_URL}${user.avatarValue.startsWith('/') ? '' : '/'}${user.avatarValue}`;
   }
   const seed = user?.avatarValue || user?.username || 'Felix';
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;

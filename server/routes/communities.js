@@ -1,26 +1,10 @@
 import express from 'express';
 import Community from '../models/Community.js';
-import multer from 'multer';
+import upload from '../middleware/upload.middleware.js'; // Use Cloudinary middleware
 import path from 'path';
 import fs from 'fs';
 
 const router = express.Router();
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      const p = 'uploads/communities/';
-      if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
-      cb(null, p);
-    },
-    filename: (req, file, cb) => cb(null, `comm-${Date.now()}${path.extname(file.originalname)}`)
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Images only!'));
-  }
-});
 
 // GET all communities (or search)
 router.get('/', async (req, res) => {
@@ -61,10 +45,11 @@ router.post('/', upload.fields([{ name: 'icon', maxCount: 1 }, { name: 'banner',
     if (existing) return res.status(400).json({ message: 'Community name already taken' });
 
     let iconPath = req.body.icon; // Could be Dicebear string from frontend
-    if (req.files['icon']) iconPath = `/uploads/communities/${req.files['icon'][0].filename}`;
+    // Use Cloudinary URL (path property)
+    if (req.files?.['icon']) iconPath = req.files['icon'][0].path;
 
     let bannerPath = null;
-    if (req.files['banner']) bannerPath = `/uploads/communities/${req.files['banner'][0].filename}`;
+    if (req.files?.['banner']) bannerPath = req.files['banner'][0].path;
 
     const newCommunity = new Community({
       name,
@@ -80,7 +65,8 @@ router.post('/', upload.fields([{ name: 'icon', maxCount: 1 }, { name: 'banner',
     const saved = await newCommunity.save();
     res.status(201).json(saved);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Community Creation Error:', err); // Log full error
+    res.status(400).json({ message: err.message || 'Failed to create community' });
   }
 });
 
@@ -90,8 +76,8 @@ router.put('/:id', upload.fields([{ name: 'icon', maxCount: 1 }, { name: 'banner
     const { description, rules, privacy } = req.body;
     const updateData = { description, rules, privacy };
 
-    if (req.files['icon']) updateData.icon = `/uploads/communities/${req.files['icon'][0].filename}`;
-    if (req.files['banner']) updateData.banner = `/uploads/communities/${req.files['banner'][0].filename}`;
+    if (req.files?.['icon']) updateData.icon = req.files['icon'][0].path;
+    if (req.files?.['banner']) updateData.banner = req.files['banner'][0].path;
 
     const community = await Community.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(community);

@@ -1,44 +1,8 @@
 import express from 'express';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import upload from '../middleware/upload.middleware.js'; // Use Cloudinary middleware
 import Resource from '../models/Resource.js';
 
 const router = express.Router();
-
-// -- Multer Config --
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = 'uploads/';
-    // Create folder if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    // Unique filename: fieldname-timestamp.ext
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (req, file, cb) => {
-    const filetypes = /pdf|doc|docx|txt/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (extname && mimetype) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Error: Documents only (PDF, DOC, DOCX, TXT)!'));
-    }
-  },
-});
-
-// -- Routes --
 
 // GET all resources
 router.get('/', async (req, res) => {
@@ -49,8 +13,7 @@ router.get('/', async (req, res) => {
     // If parentId is 'null' string (from query params), treat as null object
     if (parentId === 'null') query.parentId = null;
 
-    const resources = await Resource.find(query).sort({ type: 1, createdAt: -1 }); // Folders first (if 'folder' < 'link' alphabetically? No, 'f' comes before 'l'. We might need better sort)
-    // Actually 'folder' comes before 'link'. So sorting by type: 1 puts folders first.
+    const resources = await Resource.find(query).sort({ type: 1, createdAt: -1 });
     res.json(resources);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -63,10 +26,9 @@ router.post('/', upload.single('file'), async (req, res) => {
     const { title, type, description, url, tags, user, isPublic, parentId } = req.body;
     let resourceUrl = url;
 
-    // If file uploaded, use file path as URL
+    // If file uploaded, use Cloudinary URL
     if (req.file) {
-      // We'll store the relative path. Ensure server serves 'uploads' statically.
-      resourceUrl = `/uploads/${req.file.filename}`;
+      resourceUrl = req.file.path;
     }
 
     const newResource = new Resource({
@@ -105,7 +67,7 @@ router.put('/:id', upload.single('file'), async (req, res) => {
     }
 
     if (req.file) {
-      resource.url = `/uploads/${req.file.filename}`;
+      resource.url = req.file.path;
     } else if (url) {
       resource.url = url;
     }

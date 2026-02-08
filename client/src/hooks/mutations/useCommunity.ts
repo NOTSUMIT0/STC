@@ -66,7 +66,57 @@ export const useLikePost = () => {
       const response = await api.put(`/api/posts/${id}/like`, { userId, action });
       return response.data;
     },
-    onSuccess: () => {
+    onMutate: async ({ id, userId, action }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+
+      // Snapshot the previous value
+      const previousPosts = queryClient.getQueriesData({ queryKey: ['posts'] });
+
+      // Optimistically update to the new value
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any) => {
+        if (!old || !Array.isArray(old)) return old;
+        return old.map((post: any) => {
+          if (post._id === id) {
+            let likes = [...(post.likes || [])];
+            let dislikes = [...(post.dislikes || [])];
+
+            const likeIndex = likes.findIndex((id: any) => id.toString() === userId.toString());
+            const dislikeIndex = dislikes.findIndex((id: any) => id.toString() === userId.toString());
+
+            if (action === 'upvote') {
+              if (likeIndex === -1) {
+                likes.push(userId);
+                if (dislikeIndex !== -1) dislikes.splice(dislikeIndex, 1);
+              } else {
+                likes.splice(likeIndex, 1); // Toggle off
+              }
+            } else if (action === 'downvote') {
+              if (dislikeIndex === -1) {
+                dislikes.push(userId);
+                if (likeIndex !== -1) likes.splice(likeIndex, 1);
+              } else {
+                dislikes.splice(dislikeIndex, 1); // Toggle off
+              }
+            }
+            return { ...post, likes, dislikes };
+          }
+          return post;
+        });
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousPosts };
+    },
+    onError: (err, newTodo, context) => {
+      // Rollback to the previous value
+      if (context?.previousPosts) {
+        context.previousPosts.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });

@@ -52,10 +52,10 @@ router.put('/me', authenticate, upload.single('avatar'), async (req, res) => {
       avatarType: avatarType || 'seed',
     };
 
-    // If file uploaded, convert to Base64 and use as avatarValue
+    // If file uploaded, use the Cloudinary URL
     if (req.file) {
       updateData.avatarType = 'upload';
-      updateData.avatarValue = fileToBase64(req.file);
+      updateData.avatarValue = req.file.path; // Cloudinary URL
     } else if (avatarValue && avatarType === 'seed') {
       updateData.avatarValue = avatarValue;
     }
