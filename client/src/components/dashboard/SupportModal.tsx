@@ -78,12 +78,12 @@ const SupportModal = ({ isOpen, onClose, user }: { isOpen: boolean; onClose: () 
             </select>
           </div>
 
-          <div className="form-control w-full">
-            <label className="label">
+          <div className="form-control w-full flex flex-col gap-2">
+            <label className="label p-0">
               <span className="label-text font-semibold">Message</span>
             </label>
             <textarea
-              className="textarea textarea-bordered h-40 resize-none bg-base-200 focus:bg-base-100 transition-colors leading-relaxed"
+              className="textarea textarea-bordered h-40 resize-none bg-base-200 focus:bg-base-100 transition-colors leading-relaxed w-full"
               placeholder="Describe your issue in detail..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
