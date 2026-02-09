@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useFetchPost } from '../hooks/queries/useCommunity';
 import { useLikePost } from '../hooks/mutations/useCommunity';
 import { useFetchComments } from '../hooks/queries/useComments';
@@ -206,7 +207,7 @@ const PostPage = ({ user }: { user: any }) => {
 
               <div className="flex gap-2 text-gray-500 text-xs font-bold items-center border-t border-[#343536] pt-2">
                 <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer"><ChatBubbleLeftIcon className="w-5 h-5" /> {(post.likes?.length || 0) + (Math.floor(Math.random() * 5))} Comments</div>
-                <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer" onClick={() => { navigator.clipboard.writeText(window.location.href).then(() => alert("Link Copied!")); }}><ShareIcon className="w-5 h-5" /> Share</div>
+                <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer" onClick={() => { navigator.clipboard.writeText(window.location.href).then(() => toast.success("Link Copied!")); }}><ShareIcon className="w-5 h-5" /> Share</div>
               </div>
             </div>
           </div>

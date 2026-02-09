@@ -7,6 +7,9 @@ import Home from './pages/Home';
 import PostPage from './pages/PostPage';
 import { useCheckAuth } from './hooks/queries/useAuth';
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   const { data: user, isLoading } = useCheckAuth();
 
@@ -22,6 +25,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-base-300 text-base-content font-sans antialiased selection:bg-primary selection:text-primary-content">
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
         <Routes>
           <Route path="/" element={<Home user={user} />} />
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />

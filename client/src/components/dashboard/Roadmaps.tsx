@@ -52,7 +52,7 @@ const Roadmaps = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
         <div>
-          <h2 className="text-4xl font-extrabold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent tracking-tight">
+          <h2 className="text-4xl font-extrabold text-base-content tracking-tight">
             Learning Roadmaps
           </h2>
           <p className="mt-2 text-gray-400 max-w-xl leading-relaxed">
@@ -69,7 +69,7 @@ const Roadmaps = () => {
           <input
             type="text"
             placeholder="Search roadmaps..."
-            className="input input-bordered w-full pl-10 bg-[#1e2124] border-white/5 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 text-white placeholder:text-gray-600 transition-all rounded-xl"
+            className="input input-bordered w-full pl-10 bg-base-200 border-base-content/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 text-base-content placeholder:text-base-content/40 transition-all rounded-xl"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -85,7 +85,7 @@ const Roadmaps = () => {
               href={map.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative bg-[#1e2124] rounded-2xl p-6 border border-white/5 hover:border-white/10 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
+              className="group relative bg-base-200 rounded-2xl p-6 border border-base-content/5 hover:border-base-content/10 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/5"
             >
               {/* Hover Clean Gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -93,7 +93,7 @@ const Roadmaps = () => {
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-4">
                   <span className="text-4xl filter drop-shadow-lg">{map.icon}</span>
-                  <div className="p-2 rounded-full bg-white/5 text-gray-400 group-hover:bg-white/10 group-hover:text-white transition-colors">
+                  <div className="p-2 rounded-full bg-base-100 text-base-content/40 group-hover:bg-base-100 group-hover:text-base-content transition-colors">
                     <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </div>
                 </div>

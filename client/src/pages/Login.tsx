@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLogin } from '../hooks/mutations/useAuth';
 
+import { toast } from 'react-toastify';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,11 +16,12 @@ const Login = () => {
     login({ email, password }, {
       onSuccess: (data) => {
         localStorage.setItem('user', JSON.stringify(data.user));
+        toast.success(`Welcome back, ${data.user.username}!`);
         navigate('/dashboard');
       },
       onError: (error: any) => {
         console.error('Login error:', error);
-        alert(error.response?.data?.message || 'Login failed');
+        toast.error(error.response?.data?.message || 'Login failed');
       }
     });
   };

@@ -48,22 +48,31 @@ router.put('/:id/like', async (req, res) => {
     if (!Array.isArray(comment.likes)) comment.likes = [];
     if (!Array.isArray(comment.dislikes)) comment.dislikes = [];
 
-    const likeIndex = comment.likes.indexOf(userId);
-    const dislikeIndex = comment.dislikes.indexOf(userId);
+    // Fix: Use findIndex with toString() for robust ObjectId comparison
+    const likeIndex = comment.likes.findIndex(id => id.toString() === userId.toString());
+    const dislikeIndex = comment.dislikes.findIndex(id => id.toString() === userId.toString());
 
     if (action === 'upvote') {
-      if (likeIndex === -1) {
-        comment.likes.push(userId);
-        if (dislikeIndex !== -1) comment.dislikes.splice(dislikeIndex, 1);
+      if (likeIndex !== -1) {
+        // Already upvoted -> Toggle Off (Neutral)
+        comment.likes.splice(likeIndex, 1);
+      } else if (dislikeIndex !== -1) {
+        // Currently downvoted -> Remove Downvote (Neutral)
+        comment.dislikes.splice(dislikeIndex, 1);
       } else {
-        comment.likes.splice(likeIndex, 1); // Toggle off
+        // Neutral -> Upvote
+        comment.likes.push(userId);
       }
     } else if (action === 'downvote') {
-      if (dislikeIndex === -1) {
-        comment.dislikes.push(userId);
-        if (likeIndex !== -1) comment.likes.splice(likeIndex, 1);
+      if (dislikeIndex !== -1) {
+        // Already downvoted -> Toggle Off (Neutral)
+        comment.dislikes.splice(dislikeIndex, 1);
+      } else if (likeIndex !== -1) {
+        // Currently upvoted -> Remove Upvote (Neutral)
+        comment.likes.splice(likeIndex, 1);
       } else {
-        comment.dislikes.splice(dislikeIndex, 1); // Toggle off
+        // Neutral -> Downvote
+        comment.dislikes.push(userId);
       }
     }
     // Fallback for legacy "like" toggle if no action specified (backward compatibility if needed, else redundant)

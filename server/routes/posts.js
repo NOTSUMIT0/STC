@@ -129,18 +129,26 @@ router.put('/:id/like', async (req, res) => {
     const dislikeIndex = post.dislikes.findIndex(id => id.toString() === userId);
 
     if (action === 'upvote') {
-      if (likeIndex === -1) {
-        post.likes.push(userId);
-        if (dislikeIndex !== -1) post.dislikes.splice(dislikeIndex, 1);
+      if (likeIndex !== -1) {
+        // Already upvoted -> Toggle Off (Neutral)
+        post.likes.splice(likeIndex, 1);
+      } else if (dislikeIndex !== -1) {
+        // Currently downvoted -> Remove Downvote (Neutral)
+        post.dislikes.splice(dislikeIndex, 1);
       } else {
-        post.likes.splice(likeIndex, 1); // Toggle off
+        // Neutral -> Upvote
+        post.likes.push(userId);
       }
     } else if (action === 'downvote') {
-      if (dislikeIndex === -1) {
-        post.dislikes.push(userId);
-        if (likeIndex !== -1) post.likes.splice(likeIndex, 1);
+      if (dislikeIndex !== -1) {
+        // Already downvoted -> Toggle Off (Neutral)
+        post.dislikes.splice(dislikeIndex, 1);
+      } else if (likeIndex !== -1) {
+        // Currently upvoted -> Remove Upvote (Neutral)
+        post.likes.splice(likeIndex, 1);
       } else {
-        post.dislikes.splice(dislikeIndex, 1); // Toggle off
+        // Neutral -> Downvote
+        post.dislikes.push(userId);
       }
     }
 

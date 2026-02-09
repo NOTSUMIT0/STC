@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSignup } from '../hooks/mutations/useAuth';
 
+import { toast } from 'react-toastify';
+
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -15,11 +17,12 @@ const Signup = () => {
     signup({ username, email, password }, {
       onSuccess: (data) => {
         localStorage.setItem('user', JSON.stringify(data.user));
+        toast.success('Account created successfully!');
         navigate('/dashboard');
       },
       onError: (error: any) => {
         console.error('Signup error:', error);
-        alert(error.response?.data?.message || 'Signup failed');
+        toast.error(error.response?.data?.message || 'Signup failed');
       }
     });
   };

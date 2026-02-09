@@ -79,18 +79,26 @@ export const useLikePost = () => {
             const dislikeIndex = dislikes.findIndex((id: any) => id.toString() === userId.toString());
 
             if (action === 'upvote') {
-              if (likeIndex === -1) {
-                likes.push(userId);
-                if (dislikeIndex !== -1) dislikes.splice(dislikeIndex, 1);
+              if (likeIndex !== -1) {
+                // Already upvoted -> Toggle Off (Neutral)
+                likes.splice(likeIndex, 1);
+              } else if (dislikeIndex !== -1) {
+                // Currently downvoted -> Remove Downvote (Neutral)
+                dislikes.splice(dislikeIndex, 1);
               } else {
-                likes.splice(likeIndex, 1); // Toggle off
+                // Neutral -> Upvote
+                likes.push(userId);
               }
             } else if (action === 'downvote') {
-              if (dislikeIndex === -1) {
-                dislikes.push(userId);
-                if (likeIndex !== -1) likes.splice(likeIndex, 1);
+              if (dislikeIndex !== -1) {
+                // Already downvoted -> Toggle Off (Neutral)
+                dislikes.splice(dislikeIndex, 1);
+              } else if (likeIndex !== -1) {
+                // Currently upvoted -> Remove Upvote (Neutral)
+                likes.splice(likeIndex, 1);
               } else {
-                dislikes.splice(dislikeIndex, 1); // Toggle off
+                // Neutral -> Downvote
+                dislikes.push(userId);
               }
             }
             return { ...post, likes, dislikes };

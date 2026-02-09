@@ -1,4 +1,5 @@
 ﻿import { useState, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import {
   XMarkIcon,
   PlusIcon,
@@ -101,24 +102,24 @@ const CommentNode = ({
   return (
     <div className="pl-4 border-l-2 border-[#343536] mt-4">
       <div className="flex items-center gap-2 mb-1">
-        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700">
+        <div className="w-6 h-6 rounded-full overflow-hidden bg-base-300">
           <img src={getAvatarUrl(comment.author)} className="w-full h-full object-cover" />
         </div>
-        <span className="font-bold text-xs text-gray-300">{comment.author.username}</span>
-        <span className="text-[10px] text-gray-500">â€¢ {new Date(comment.createdAt).toLocaleDateString()}</span>
+        <span className="font-bold text-xs text-base-content/80">{comment.author.username}</span>
+        <span className="text-[10px] text-base-content/60">• {new Date(comment.createdAt).toLocaleDateString()}</span>
       </div>
-      <p className="text-sm text-gray-200 mb-2">{comment.content}</p>
-      <div className="flex gap-4 text-xs font-bold text-gray-500 items-center">
-        <div className="flex bg-[#272729] rounded-full overflow-hidden items-center">
-          <button className={`p-1 hover:bg-[#343536] ${isLiked ? 'text-orange-500' : 'hover:text-orange-500'}`} onClick={() => onVote(comment._id, 'upvote')}><BookOpenIcon className="w-4 h-4" /></button>
-          <span className="px-1 text-gray-200">{score}</span>
-          <button className={`p-1 hover:bg-[#343536] ${isDisliked ? 'text-blue-500' : 'hover:text-blue-500'}`} onClick={() => onVote(comment._id, 'downvote')}><BookOpenIcon className="w-4 h-4 rotate-180" /></button>
+      <p className="text-sm text-base-content mb-2">{comment.content}</p>
+      <div className="flex gap-4 text-xs font-bold text-base-content/60 items-center">
+        <div className="flex bg-base-100 rounded-full overflow-hidden items-center">
+          <button className={`p-1 hover:bg-base-200 ${isLiked ? 'text-orange-500' : 'hover:text-orange-500'}`} onClick={() => onVote(comment._id, 'upvote')}><BookOpenIcon className="w-4 h-4" /></button>
+          <span className="px-1 text-base-content">{score}</span>
+          <button className={`p-1 hover:bg-base-200 ${isDisliked ? 'text-blue-500' : 'hover:text-blue-500'}`} onClick={() => onVote(comment._id, 'downvote')}><BookOpenIcon className="w-4 h-4 rotate-180" /></button>
         </div>
         <button className="hover:text-white" onClick={() => setReplyingToId(replyingToId === comment._id ? null : comment._id)}>Reply</button>
       </div>
       {replyingToId === comment._id && (
         <div className="mt-2 flex gap-2">
-          <input className="input input-xs w-full bg-[#272729]" placeholder="Reply..." value={replyMap[comment._id] || ''} onChange={e => setReplyMap({ ...replyMap, [comment._id]: e.target.value })} />
+          <input className="input input-xs w-full bg-base-100" placeholder="Reply..." value={replyMap[comment._id] || ''} onChange={e => setReplyMap({ ...replyMap, [comment._id]: e.target.value })} />
           <button className="btn btn-xs btn-primary" onClick={() => onReply(comment._id, replyMap[comment._id])}>Reply</button>
         </div>
       )}
@@ -175,9 +176,9 @@ const CommentSection = ({ postId, user }: { postId: string, user: any }) => {
 
 
   return (
-    <div className="p-4 bg-[#161617] rounded-b border-x border-b border-[#343536] -mt-1 pt-6" onClick={(e) => e.stopPropagation()}>
+    <div className="p-4 bg-base-300 rounded-b border-x border-b border-base-content/10 -mt-1 pt-6" onClick={(e) => e.stopPropagation()}>
       <div className="flex gap-2 mb-6">
-        <input className="input input-sm w-full bg-[#272729]" placeholder="What are your thoughts?" value={mainReply} onChange={e => setMainReply(e.target.value)} />
+        <input className="input input-sm w-full bg-base-100" placeholder="What are your thoughts?" value={mainReply} onChange={e => setMainReply(e.target.value)} />
         <button className="btn btn-sm btn-primary" onClick={() => postComment(null, mainReply)}>Comment</button>
       </div>
       {comments.map(c => (
@@ -251,16 +252,11 @@ const Community = ({ user }: { user: any }) => {
   const [editCommIcon, setEditCommIcon] = useState<File | null>(null);
   const [editCommBanner, setEditCommBanner] = useState<File | null>(null);
 
-  // Toast State
-  const [toast, setToast] = useState<{ msg: string, type: 'success' | 'error' | 'info' } | null>(null);
-  const showToast = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+
 
   const handleCreatePost = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    if (!postTitle) return alert('Title is required');
+    if (!postTitle) return toast.warn('Title is required');
     const formData = new FormData();
     formData.append('type', postType);
     formData.append('title', postTitle);
@@ -269,12 +265,12 @@ const Community = ({ user }: { user: any }) => {
     // formData.append('authorName', user.username); 
 
     const targetCommId = activeCommunity ? activeCommunity._id : (communities.length > 0 ? communities[0]._id : null);
-    if (!targetCommId) return alert("Select a community!");
+    if (!targetCommId) return toast.warn("Select a community!");
 
     // VALIDATION: Check if user is member of the selected community
     const targetComm = communities.find(c => c._id === targetCommId);
     if (targetComm && !isUserMember(targetComm)) {
-      showToast(`You must join c/${targetComm.name} to post!`, 'error');
+      toast.error(`You must join c/${targetComm.name} to post!`);
       return;
     }
 
@@ -292,18 +288,18 @@ const Community = ({ user }: { user: any }) => {
       onSuccess: () => {
         setIsPostModalOpen(false);
         setPostTitle(''); setPostContent(''); setPostImage(null); setPollOptions(['', '']);
-        showToast('Post created successfully!', 'success');
+        toast.success('Post created successfully!');
       },
       onError: (err: any) => {
         console.error(err);
-        showToast(err.response?.data?.message || err.message || 'Failed to create post', 'error');
+        toast.error(err.response?.data?.message || err.message || 'Failed to create post');
       },
     });
   };
 
   const handleCreateCommunity = () => {
-    if (!newCommName) return alert('Name is required');
-    if (!user || !user._id) return alert('You must be logged in to create a community.');
+    if (!newCommName) return toast.warn('Name is required');
+    if (!user || !user._id) return toast.error('You must be logged in to create a community.');
 
     const formData = new FormData();
     formData.append('name', newCommName);
@@ -317,9 +313,10 @@ const Community = ({ user }: { user: any }) => {
       onSuccess: () => {
         setIsCommunityModalOpen(false);
         setNewCommName(''); setNewCommDesc(''); setNewCommRules(''); setNewCommIcon(null); setNewCommBanner(null);
+        toast.success('Community created!');
       },
       onError: (error: any) => {
-        alert(error.response?.data?.message || 'Failed to create community');
+        toast.error(error.response?.data?.message || 'Failed to create community');
       }
     });
   };
@@ -346,7 +343,7 @@ const Community = ({ user }: { user: any }) => {
     deleteCommunityMutation.mutate(activeCommunity._id, {
       onSuccess: () => {
         setActiveCommunity(null);
-        alert('Community deleted');
+        toast.success('Community deleted');
       }
     });
   };
@@ -413,17 +410,17 @@ const Community = ({ user }: { user: any }) => {
   const isMod = activeCommunity?.creator === user._id;
 
   return (
-    <div className="flex min-h-screen bg-base-300 text-gray-200 justify-center w-full font-sans">
+    <div className="flex min-h-screen bg-base-300 text-base-content justify-center w-full font-sans">
       <div className="w-full max-w-[1600px] flex">
 
         {/* LEFT NAV (Simplified) */}
-        <div className="w-[270px] hidden lg:flex flex-col border-r border-base-300 bg-base-300 sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pt-4">
-          <div className="flex justify-between items-center mb-4 px-4"><span className="text-[10px] font-bold text-gray-500 tracking-widest">FEEDS</span></div>
-          <button onClick={() => setActiveCommunity(null)} className={`flex items-center gap-3 px-6 py-2 transition-all ${!activeCommunity ? 'bg-[#272729] border-r-4 border-gray-200' : 'hover:bg-[#272729]'}`}><Squares2X2Icon className="w-5 h-5" /> Home</button>
-          <div className="divider my-4 border-[#343536]"></div>
-          <div className="flex justify-between items-center mb-2 px-4"><span className="text-[10px] font-bold text-gray-500 tracking-widest">COMMUNITIES</span><button onClick={() => setIsCommunityModalOpen(true)}><PlusIcon className="w-5 h-5 hover:bg-[#272729] rounded" /></button></div>
+        <div className="w-[270px] hidden lg:flex flex-col border-r border-base-content/10 bg-base-200 sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto pt-4">
+          <div className="flex justify-between items-center mb-4 px-4"><span className="text-[10px] font-bold text-base-content/60 tracking-widest">FEEDS</span></div>
+          <button onClick={() => setActiveCommunity(null)} className={`flex items-center gap-3 px-6 py-2 transition-all ${!activeCommunity ? 'bg-base-100 border-r-4 border-base-content' : 'hover:bg-base-100'}`}><Squares2X2Icon className="w-5 h-5" /> Home</button>
+          <div className="divider my-4 border-base-content/10"></div>
+          <div className="flex justify-between items-center mb-2 px-4"><span className="text-[10px] font-bold text-base-content/60 tracking-widest">COMMUNITIES</span><button onClick={() => setIsCommunityModalOpen(true)}><PlusIcon className="w-5 h-5 hover:bg-base-100 rounded" /></button></div>
           {communities.map(c => (
-            <button key={c._id} onClick={() => setActiveCommunity(c)} className={`flex items-center gap-3 px-6 py-2 transition-all w-full text-left ${activeCommunity?._id === c._id ? 'bg-[#272729] border-r-4 border-gray-200' : 'hover:bg-[#272729]'}`}>
+            <button key={c._id} onClick={() => setActiveCommunity(c)} className={`flex items-center gap-3 px-6 py-2 transition-all w-full text-left ${activeCommunity?._id === c._id ? 'bg-base-100 border-r-4 border-base-content' : 'hover:bg-base-100'}`}>
               <img src={c.icon.startsWith('http') ? c.icon : `${API_URL}${c.icon}`} className="w-6 h-6 rounded-full" />
               <span className="truncate text-sm">{c.name}</span>
             </button>
@@ -437,18 +434,18 @@ const Community = ({ user }: { user: any }) => {
               <div className="h-48 w-full bg-[#33a8ff] relative overflow-hidden">
                 {activeCommunity.banner && <img src={activeCommunity.banner.startsWith('http') ? activeCommunity.banner : `${API_URL}${activeCommunity.banner}`} className="w-full h-full object-cover" />}
               </div>
-              <div className="bg-[#1A1A1B] px-4 pb-4">
+              <div className="bg-base-200 px-4 pb-4">
                 <div className="max-w-5xl mx-auto relative flex items-start">
-                  <div className="w-20 h-20 rounded-full border-4 border-[#1A1A1B] bg-white -mt-10 overflow-hidden relative z-10">
+                  <div className="w-20 h-20 rounded-full border-4 border-base-200 bg-base-100 -mt-10 overflow-hidden relative z-10">
                     <img src={activeCommunity.icon.startsWith('http') ? activeCommunity.icon : (activeCommunity.icon.startsWith('/') ? `${API_URL}${activeCommunity.icon}` : `https://api.dicebear.com/7.x/initials/svg?seed=${activeCommunity.name}`)} className="w-full h-full object-cover" />
                   </div>
                   <div className="ml-4 mt-2 flex-1 flex items-start justify-between">
                     <div>
-                      <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+                      <h1 className="text-2xl font-bold text-base-content flex items-center gap-2">
                         {activeCommunity.name}
-                        {isMod && <button onClick={openCommEdit} className="btn btn-ghost btn-xs btn-circle text-gray-400 hover:text-gray-200" title="Community Settings"><Cog6ToothIcon className="w-5 h-5" /></button>}
+                        {isMod && <button onClick={openCommEdit} className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-base-content" title="Community Settings"><Cog6ToothIcon className="w-5 h-5" /></button>}
                       </h1>
-                      <p className="text-sm text-gray-500">c/{activeCommunity.name}</p>
+                      <p className="text-sm text-base-content/60">c/{activeCommunity.name}</p>
                     </div>
                     <div className="flex gap-2">
                       {/* Join/Leave Logic */}
@@ -471,7 +468,7 @@ const Community = ({ user }: { user: any }) => {
                       {isMod && (
                         <div className="dropdown dropdown-end">
                           <label tabIndex={0} className="btn btn-sm btn-circle btn-ghost"><EllipsisHorizontalIcon className="w-6 h-6" /></label>
-                          <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-[#1A1A1B] border border-[#343536] rounded-md w-40">
+                          <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-200 border border-base-content/10 rounded-md w-40">
                             <li><a onClick={openCommEdit}><Squares2X2Icon className="w-4 h-4" /> Settings</a></li>
                             <li><a onClick={handleDeleteCommunity} className="text-error"><TrashIcon className="w-4 h-4" /> Delete Community</a></li>
                           </ul>
@@ -490,33 +487,33 @@ const Community = ({ user }: { user: any }) => {
             <div className="flex-1 space-y-4">
               {/* Create Post Input Trigger - Conditional Rendering */}
               {activeCommunity && !isUserMember(activeCommunity) && !isMod ? (
-                <div className="bg-[#1A1A1B] border border-[#343536] p-4 rounded flex items-center justify-between gap-2">
-                  <span className="font-bold text-gray-400">Join c/{activeCommunity.name} to start posting!</span>
+                <div className="bg-base-200 border border-base-content/10 p-4 rounded flex items-center justify-between gap-2">
+                  <span className="font-bold text-base-content/60">Join c/{activeCommunity.name} to start posting!</span>
                   <button className="btn btn-sm btn-primary rounded-full" onClick={() => handleJoinLeave(activeCommunity._id, 'join')} disabled={joinLeaveCommunityMutation.isPending}>
                     {joinLeaveCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
                     Join Community
                   </button>
                 </div>
               ) : (
-                <div className="bg-[#1A1A1B] border border-[#343536] p-2 rounded flex items-center gap-2 cursor-pointer hover:border-gray-500 transition-colors" onClick={() => setIsPostModalOpen(true)}>
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-700"><img src={getAvatarUrl(user)} className="object-cover w-full h-full" /></div>
-                  <input type="text" placeholder="Create Post" className="input input-sm flex-1 bg-[#272729] border border-[#343536] hover:bg-[#1A1A1B] focus:outline-none" readOnly />
-                  <PhotoIcon className="w-6 h-6 text-gray-500" />
+                <div className="bg-base-200 border border-base-content/10 p-2 rounded flex items-center gap-2 cursor-pointer hover:border-base-content/20 transition-colors" onClick={() => setIsPostModalOpen(true)}>
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-base-300"><img src={getAvatarUrl(user)} className="object-cover w-full h-full" /></div>
+                  <input type="text" placeholder="Create Post" className="input input-sm flex-1 bg-base-100 border border-base-content/10 hover:bg-base-200 focus:outline-none" readOnly />
+                  <PhotoIcon className="w-6 h-6 text-base-content/60" />
                 </div>
               )}
 
               {/* Filter Bar */}
-              <div className="border border-[#343536] rounded bg-[#1A1A1B] p-2 flex gap-4 text-sm font-bold text-gray-500">
-                <button onClick={() => setFilterMode('hot')} className={`hover:bg-[#272729] px-3 py-1 rounded-full ${filterMode === 'hot' ? 'text-gray-100 bg-[#272729]' : ''}`}>Hot</button>
-                <button onClick={() => setFilterMode('new')} className={`hover:bg-[#272729] px-3 py-1 rounded-full ${filterMode === 'new' ? 'text-gray-100 bg-[#272729]' : ''}`}>New</button>
-                <button onClick={() => setFilterMode('top')} className={`hover:bg-[#272729] px-3 py-1 rounded-full ${filterMode === 'top' ? 'text-gray-100 bg-[#272729]' : ''}`}>Top</button>
+              <div className="border border-base-content/10 rounded bg-base-200 p-2 flex gap-4 text-sm font-bold text-base-content/60">
+                <button onClick={() => setFilterMode('hot')} className={`hover:bg-base-100 px-3 py-1 rounded-full ${filterMode === 'hot' ? 'text-base-content bg-base-100' : ''}`}>Hot</button>
+                <button onClick={() => setFilterMode('new')} className={`hover:bg-base-100 px-3 py-1 rounded-full ${filterMode === 'new' ? 'text-base-content bg-base-100' : ''}`}>New</button>
+                <button onClick={() => setFilterMode('top')} className={`hover:bg-base-100 px-3 py-1 rounded-full ${filterMode === 'top' ? 'text-base-content bg-base-100' : ''}`}>Top</button>
               </div>
 
               {/* Posts */}
               {loading ? (
                 <div className="flex justify-center p-10"><span className="loading loading-spinner loading-lg text-primary"></span></div>
               ) : posts?.length === 0 ? (
-                <div className="text-center py-10 text-gray-500 bg-[#1A1A1B] border border-[#343536] rounded">
+                <div className="text-center py-10 text-base-content/60 bg-base-200 border border-base-content/10 rounded">
                   <p className="font-bold mb-2">No posts yet</p>
                   <p className="text-sm">Be the first to share something!</p>
                 </div>
@@ -532,33 +529,33 @@ const Community = ({ user }: { user: any }) => {
                   const canModerate = isMod && activeCommunity?._id === postCommunity?._id; // If I am mod of this community, I can delete this post
 
                   return (
-                    <div key={post._id} className="bg-[#1A1A1B] border border-[#343536] rounded hover:border-gray-500 transition-colors cursor-pointer" onClick={() => toggleComments(post._id)}>
+                    <div key={post._id} className="bg-base-200 border border-base-content/10 rounded hover:border-base-content/30 transition-colors cursor-pointer" onClick={() => toggleComments(post._id)}>
                       <div className="flex">
                         <div className="p-3 flex-1">
-                          <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                          <div className="flex items-center justify-between text-xs text-base-content/60 mb-2">
                             <div className="flex items-center gap-1">
-                              {post.community && !activeCommunity && <span className="font-bold text-gray-300 hover:underline">c/{post.community.name}</span>}
+                              {post.community && !activeCommunity && <span className="font-bold text-base-content hover:underline">c/{post.community.name}</span>}
                               <div className="flex items-center gap-1">
                                 <div className="w-4 h-4 rounded-full overflow-hidden"><img src={getAvatarUrl(post.author)} className="w-full h-full object-cover" /></div>
                                 <span className={`font-bold ${isPostCreator ? 'text-green-500' : ''}`}>u/{post.author.username}</span>
                                 {isPostCreator && <span className="badge badge-xs badge-success text-[8px] font-bold text-black ml-1">MOD</span>}
                               </div>
-                              <span>â€¢ {new Date(post.createdAt).toLocaleDateString()}</span>
+                              <span>• {new Date(post.createdAt).toLocaleDateString()}</span>
                             </div>
                             {(isAuthor || canModerate) && (
                               <div className="dropdown dropdown-end">
                                 <label tabIndex={0} onClick={e => e.stopPropagation()} className="btn btn-ghost btn-xs btn-circle"><EllipsisHorizontalIcon className="w-4 h-4" /></label>
-                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-[#1A1A1B] border border-[#343536] rounded w-32">
+                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-200 border border-base-content/10 rounded w-32">
                                   {isAuthor && <li><a onClick={(e) => { e.stopPropagation(); setIsEditModalOpen(true); setEditingPost(post); setEditTitle(post.title); setEditContent(post.content || ''); }}>Edit</a></li>}
                                   <li><a onClick={(e) => { e.stopPropagation(); handleDeletePost(post._id); }}>Delete</a></li>
                                 </ul>
                               </div>
                             )}
                           </div>
-                          <h3 className="text-lg font-medium text-gray-100 mb-2">{post.title}</h3>
-                          {post.type === 'text' && <div className="text-sm text-gray-300 mb-4">{post.content}</div>}
+                          <h3 className="text-lg font-medium text-base-content mb-2">{post.title}</h3>
+                          {post.type === 'text' && <div className="text-sm text-base-content/80 mb-4">{post.content}</div>}
                           {post.type === 'image' && post.image && (
-                            <div className="bg-black border border-[#343536] rounded overflow-hidden mb-4 max-h-[500px] flex justify-center">
+                            <div className="bg-black border border-base-content/10 rounded overflow-hidden mb-4 max-h-[500px] flex justify-center">
                               <img
                                 src={post.image.startsWith('http') || post.image.startsWith('data:') ? post.image : `${API_URL}${post.image}`}
                                 className="object-contain"
@@ -573,29 +570,29 @@ const Community = ({ user }: { user: any }) => {
                                 const totalVotes = post.options?.reduce((acc, o) => acc + o.votes, 0) || 0;
                                 const percentage = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
                                 return (
-                                  <div key={idx} className="relative w-full bg-[#272729] rounded overflow-hidden cursor-pointer hover:bg-[#343536] transition-colors border border-[#343536]" onClick={(e) => { e.stopPropagation(); handleVotePoll(post._id, idx); }}>
+                                  <div key={idx} className="relative w-full bg-base-100 rounded overflow-hidden cursor-pointer hover:bg-base-200 transition-colors border border-base-content/10" onClick={(e) => { e.stopPropagation(); handleVotePoll(post._id, idx); }}>
                                     <div className="absolute top-0 left-0 h-full bg-primary/20 transition-all duration-500" style={{ width: `${percentage}%` }}></div>
                                     <div className="relative p-3 flex justify-between items-center z-10">
-                                      <span className="font-bold text-sm text-gray-200">{opt.text}</span>
-                                      <span className="text-xs font-bold text-gray-400">{percentage}% ({opt.votes})</span>
+                                      <span className="font-bold text-sm text-base-content">{opt.text}</span>
+                                      <span className="text-xs font-bold text-base-content/60">{percentage}% ({opt.votes})</span>
                                     </div>
                                   </div>
                                 );
                               })}
-                              <div className="text-xs text-gray-500 font-bold px-1">
+                              <div className="text-xs text-base-content/60 font-bold px-1">
                                 Total Votes: {post.options.reduce((acc, o) => acc + o.votes, 0)}
                               </div>
                             </div>
                           )}
 
-                          <div className="flex gap-2 text-gray-500 text-xs font-bold items-center">
-                            <div className="flex bg-[#272729] rounded-full overflow-hidden items-center" onClick={(e) => e.stopPropagation()}>
-                              <button onClick={(e) => handleUpvote(post._id, e)} className={`p-2 hover:bg-[#343536] ${post.likes?.includes(user._id) ? 'text-orange-500' : 'hover:text-orange-500'}`}><BookOpenIcon className="w-5 h-5" /></button>
-                              <span className="px-1 text-gray-200">{(post.likes?.length || 0) - (post.dislikes?.length || 0)}</span>
-                              <button onClick={(e) => handleDownvote(post._id, e)} className={`p-2 hover:bg-[#343536] ${post.dislikes?.includes(user._id) ? 'text-blue-500' : 'hover:text-blue-500'}`}><BookOpenIcon className="w-5 h-5 rotate-180" /></button>
+                          <div className="flex gap-2 text-base-content/60 text-xs font-bold items-center">
+                            <div className="flex bg-base-100 rounded-full overflow-hidden items-center" onClick={(e) => e.stopPropagation()}>
+                              <button onClick={(e) => handleUpvote(post._id, e)} className={`p-2 hover:bg-base-200 ${post.likes?.includes(user._id) ? 'text-orange-500' : 'hover:text-orange-500'}`}><BookOpenIcon className="w-5 h-5" /></button>
+                              <span className="px-1 text-base-content">{(post.likes?.length || 0) - (post.dislikes?.length || 0)}</span>
+                              <button onClick={(e) => handleDownvote(post._id, e)} className={`p-2 hover:bg-base-200 ${post.dislikes?.includes(user._id) ? 'text-blue-500' : 'hover:text-blue-500'}`}><BookOpenIcon className="w-5 h-5 rotate-180" /></button>
                             </div>
-                            <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer" onClick={() => toggleComments(post._id)}><ChatBubbleLeftIcon className="w-5 h-5" /> {expandedComments.has(post._id) ? 'Hide Comments' : 'Comments'}</div>
-                            <div className="flex items-center gap-2 hover:bg-[#272729] p-2 rounded-full cursor-pointer" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(window.location.origin + "/post/" + post._id).then(() => alert("Link Copied!")); }}><ShareIcon className="w-5 h-5" /> Share</div>
+                            <div className="flex items-center gap-2 hover:bg-base-200 p-2 rounded-full cursor-pointer" onClick={() => toggleComments(post._id)}><ChatBubbleLeftIcon className="w-5 h-5" /> {expandedComments.has(post._id) ? 'Hide Comments' : 'Comments'}</div>
+                            <div className="flex items-center gap-2 hover:bg-base-200 p-2 rounded-full cursor-pointer" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(window.location.origin + "/post/" + post._id).then(() => toast.success("Link Copied!")); }}><ShareIcon className="w-5 h-5" /> Share</div>
                           </div>
 
                           {expandedComments.has(post._id) && <CommentSection postId={post._id} user={user} />}
@@ -610,27 +607,27 @@ const Community = ({ user }: { user: any }) => {
             <div className="w-[312px] hidden lg:block space-y-4">
               {activeCommunity ? (
                 <>
-                  <div className="bg-[#1A1A1B] border border-[#343536] rounded">
+                  <div className="bg-base-200 border border-base-content/10 rounded">
                     <div className="bg-[#0079D3] px-3 py-2 rounded-t flex justify-between items-center"><h3 className="text-sm font-bold text-white">About Community</h3> {isMod && <Cog6ToothIcon className="w-4 h-4 text-white cursor-pointer" onClick={openCommEdit} />}</div>
                     <div className="p-3">
-                      <div className="text-sm text-gray-300 mb-4">{activeCommunity.description}</div>
-                      <div className="text-xs text-gray-500 border-b border-[#343536] pb-3 mb-3">Created {new Date(activeCommunity.createdAt).toLocaleDateString()}</div>
+                      <div className="text-sm text-base-content/80 mb-4">{activeCommunity.description}</div>
+                      <div className="text-xs text-base-content/60 border-b border-base-content/10 pb-3 mb-3">Created {new Date(activeCommunity.createdAt).toLocaleDateString()}</div>
                       <div className="flex gap-4 text-sm font-medium mb-4">
-                        <div><div className="text-gray-100">{activeCommunity.members.length}</div><div className="text-gray-500 text-xs">Members</div></div>
-                        <div><div className="text-gray-100">{Math.max(1, Math.floor(activeCommunity.members.length * 0.7))}</div><div className="text-gray-500 text-xs">Online</div></div>
+                        <div><div className="text-base-content">{activeCommunity.members.length}</div><div className="text-base-content/60 text-xs">Members</div></div>
+                        <div><div className="text-base-content">{Math.max(1, Math.floor(activeCommunity.members.length * 0.7))}</div><div className="text-base-content/60 text-xs">Online</div></div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[#1A1A1B] border border-[#343536] rounded p-3">
-                    <div className="text-xs font-bold text-gray-500 mb-2 uppercase border-b border-[#343536] pb-2">r/{activeCommunity.name} Rules</div>
-                    <div className="text-sm text-gray-300 whitespace-pre-wrap">{activeCommunity.rules || "1. Be respectful\n2. No spam"}</div>
+                  <div className="bg-base-200 border border-base-content/10 rounded p-3">
+                    <div className="text-xs font-bold text-base-content/60 mb-2 uppercase border-b border-base-content/10 pb-2">r/{activeCommunity.name} Rules</div>
+                    <div className="text-sm text-base-content/80 whitespace-pre-wrap">{activeCommunity.rules || "1. Be respectful\n2. No spam"}</div>
                   </div>
                 </>
               ) : (
-                <div className="bg-[#1A1A1B] border border-[#343536] rounded p-3">
-                  <h3 className="text-sm font-bold border-b border-[#343536] pb-2 mb-2">Home</h3>
-                  <p className="text-xs text-gray-400 mb-4">Your personal STC frontpage. Come here to check in with your favorite communities.</p>
+                <div className="bg-base-200 border border-base-content/10 rounded p-3">
+                  <h3 className="text-sm font-bold border-b border-base-content/10 pb-2 mb-2 text-base-content">Home</h3>
+                  <p className="text-xs text-base-content/60 mb-4">Your personal STC frontpage. Come here to check in with your favorite communities.</p>
                   <button className="btn btn-primary btn-sm w-full rounded-full mb-2" onClick={() => setIsPostModalOpen(true)}>Create Post</button>
                   <button className="btn btn-outline btn-sm w-full rounded-full" onClick={() => setIsCommunityModalOpen(true)}>Create Community</button>
                 </div>
@@ -642,27 +639,44 @@ const Community = ({ user }: { user: any }) => {
       </div>
 
       {
+        (isEditModalOpen && editingPost) && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="card w-full max-w-xl bg-base-200 border border-base-content/10 text-base-content">
+              <div className="p-4 border-b border-base-content/10 flex justify-between"><h3 className="font-bold">Edit Post</h3><button onClick={() => setIsEditModalOpen(false)} className="text-base-content/60 hover:text-base-content"><XMarkIcon className="w-5 h-5" /></button></div>
+              <div className="p-4">
+                <input className="input input-bordered w-full mb-2 bg-base-100" placeholder="Title" value={editTitle} onChange={e => setEditTitle(e.target.value)} />
+                <textarea className="textarea textarea-bordered w-full h-32 bg-base-100" placeholder="Content" value={editContent} onChange={e => setEditContent(e.target.value)}></textarea>
+                <div className="mt-4 flex justify-end"><button className="btn btn-primary" onClick={handleUpdatePost} disabled={updatePostMutation.isPending}>
+                  {updatePostMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
+                  Update Post
+                </button></div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+      {
         (isCommunityModalOpen || isEditCommModalOpen) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="card w-full max-w-lg bg-[#1A1A1B] border border-[#343536] shadow-2xl">
-              <div className="p-4 border-b border-[#343536] flex justify-between">
-                <h3 className="text-lg font-bold">{isEditCommModalOpen ? 'Mod Tools' : 'Create a Community'}</h3>
-                <button onClick={() => { setIsCommunityModalOpen(false); setIsEditCommModalOpen(false); }}><XMarkIcon className="w-6 h-6" /></button>
+            <div className="card w-full max-w-lg bg-base-200 border border-base-content/10 shadow-2xl">
+              <div className="p-4 border-b border-base-content/10 flex justify-between">
+                <h3 className="text-lg font-bold text-base-content">{isEditCommModalOpen ? 'Mod Tools' : 'Create a Community'}</h3>
+                <button onClick={() => { setIsCommunityModalOpen(false); setIsEditCommModalOpen(false); }} className="text-base-content/60 hover:text-base-content"><XMarkIcon className="w-6 h-6" /></button>
               </div>
               <div className="p-6 space-y-4">
                 {isEditCommModalOpen ? (
                   <>
-                    <label className="text-xs font-bold">Description</label>
-                    <textarea className="textarea textarea-bordered w-full bg-[#272729]" value={editCommDesc} onChange={e => setEditCommDesc(e.target.value)} />
-                    <label className="text-xs font-bold">Rules</label>
-                    <textarea className="textarea textarea-bordered h-24 w-full bg-[#272729]" value={editCommRules} onChange={e => setEditCommRules(e.target.value)} />
+                    <label className="text-xs font-bold text-base-content/60">Description</label>
+                    <textarea className="textarea textarea-bordered w-full bg-base-100" value={editCommDesc} onChange={e => setEditCommDesc(e.target.value)} />
+                    <label className="text-xs font-bold text-base-content/60">Rules</label>
+                    <textarea className="textarea textarea-bordered h-24 w-full bg-base-100" value={editCommRules} onChange={e => setEditCommRules(e.target.value)} />
                     <div>
-                      <label className="text-xs font-bold block mb-1">Update Icon</label>
-                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-[#272729]" onChange={e => setEditCommIcon(e.target.files?.[0] || null)} />
+                      <label className="text-xs font-bold block mb-1 text-base-content/60">Update Icon</label>
+                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-base-100" onChange={e => setEditCommIcon(e.target.files?.[0] || null)} />
                     </div>
                     <div>
-                      <label className="text-xs font-bold block mb-1">Update Banner</label>
-                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-[#272729]" onChange={e => setEditCommBanner(e.target.files?.[0] || null)} />
+                      <label className="text-xs font-bold block mb-1 text-base-content/60">Update Banner</label>
+                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-base-100" onChange={e => setEditCommBanner(e.target.files?.[0] || null)} />
                     </div>
                     <div className="flex justify-end gap-2 mt-4"><button className="btn btn-primary" onClick={handleEditCommunity} disabled={editCommunityMutation.isPending}>
                       {editCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
@@ -671,17 +685,17 @@ const Community = ({ user }: { user: any }) => {
                   </>
                 ) : (
                   <>
-                    <label className="text-xs font-bold">Name</label>
-                    <div className="relative"><span className="absolute left-3 top-3 text-gray-500">c/</span><input className="input input-bordered w-full pl-8 bg-[#272729]" value={newCommName} onChange={e => setNewCommName(e.target.value)} /></div>
-                    <label className="text-xs font-bold">Description</label>
-                    <textarea className="textarea textarea-bordered w-full bg-[#272729]" value={newCommDesc} onChange={e => setNewCommDesc(e.target.value)} />
+                    <label className="text-xs font-bold text-base-content/60">Name</label>
+                    <div className="relative"><span className="absolute left-3 top-3 text-base-content/40">c/</span><input className="input input-bordered w-full pl-8 bg-base-100" value={newCommName} onChange={e => setNewCommName(e.target.value)} /></div>
+                    <label className="text-xs font-bold text-base-content/60">Description</label>
+                    <textarea className="textarea textarea-bordered w-full bg-base-100" value={newCommDesc} onChange={e => setNewCommDesc(e.target.value)} />
                     <div>
-                      <label className="text-xs font-bold block mb-1">Icon (Optional)</label>
-                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-[#272729]" onChange={e => setNewCommIcon(e.target.files?.[0] || null)} />
+                      <label className="text-xs font-bold block mb-1 text-base-content/60">Icon (Optional)</label>
+                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-base-100" onChange={e => setNewCommIcon(e.target.files?.[0] || null)} />
                     </div>
                     <div>
-                      <label className="text-xs font-bold block mb-1">Banner (Optional)</label>
-                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-[#272729]" onChange={e => setNewCommBanner(e.target.files?.[0] || null)} />
+                      <label className="text-xs font-bold block mb-1 text-base-content/60">Banner (Optional)</label>
+                      <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-base-100" onChange={e => setNewCommBanner(e.target.files?.[0] || null)} />
                     </div>
                     <div className="flex justify-end gap-2 mt-4"><button className="btn btn-primary" onClick={handleCreateCommunity} disabled={createCommunityMutation.isPending}>
                       {createCommunityMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
@@ -698,37 +712,37 @@ const Community = ({ user }: { user: any }) => {
       {
         isPostModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="card w-full max-w-xl bg-[#1A1A1B] border border-[#343536] text-gray-200">
-              <div className="p-4 border-b border-[#343536] flex justify-between"><h3 className="font-bold">Create Post</h3><button onClick={() => setIsPostModalOpen(false)}><XMarkIcon className="w-5 h-5" /></button></div>
+            <div className="card w-full max-w-xl bg-base-200 border border-base-content/10 text-base-content">
+              <div className="p-4 border-b border-base-content/10 flex justify-between"><h3 className="font-bold">Create Post</h3><button onClick={() => setIsPostModalOpen(false)} className="text-base-content/60 hover:text-base-content"><XMarkIcon className="w-5 h-5" /></button></div>
               <div className="p-4">
                 <div className="flex gap-2 mb-4">
                   {activeCommunity ? <span className="badge badge-lg">c/{activeCommunity.name}</span> :
-                    <select className="select select-sm bg-[#272729]" onChange={e => { const c = communities.find(x => x._id === e.target.value); if (c) setActiveCommunity(c); }}>
+                    <select className="select select-sm bg-base-100" onChange={e => { const c = communities.find(x => x._id === e.target.value); if (c) setActiveCommunity(c); }}>
                       <option disabled selected>Select Community</option>
                       {communities.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                     </select>
                   }
                 </div>
 
-                <div className="tabs tabs-boxed bg-[#1A1A1B] border border-[#343536] mb-4 p-1">
-                  <a className={`tab ${postType === 'text' ? 'tab-active bg-[#272729] text-white' : ''}`} onClick={() => setPostType('text')}>Text</a>
-                  <a className={`tab ${postType === 'image' ? 'tab-active bg-[#272729] text-white' : ''}`} onClick={() => setPostType('image')}>Image</a>
-                  <a className={`tab ${postType === 'poll' ? 'tab-active bg-[#272729] text-white' : ''}`} onClick={() => setPostType('poll')}>Poll</a>
+                <div className="tabs tabs-boxed bg-base-200 border border-base-content/10 mb-4 p-1">
+                  <a className={`tab ${postType === 'text' ? 'tab-active bg-primary text-primary-content' : ''}`} onClick={() => setPostType('text')}>Text</a>
+                  <a className={`tab ${postType === 'image' ? 'tab-active bg-primary text-primary-content' : ''}`} onClick={() => setPostType('image')}>Image</a>
+                  <a className={`tab ${postType === 'poll' ? 'tab-active bg-primary text-primary-content' : ''}`} onClick={() => setPostType('poll')}>Poll</a>
                 </div>
 
-                <input className="input input-bordered w-full mb-2 bg-[#272729]" placeholder="Title" value={postTitle} onChange={e => setPostTitle(e.target.value)} />
+                <input className="input input-bordered w-full mb-2 bg-base-100" placeholder="Title" value={postTitle} onChange={e => setPostTitle(e.target.value)} />
 
                 {postType === 'text' && (
-                  <textarea className="textarea textarea-bordered w-full h-32 bg-[#272729]" placeholder="Content" value={postContent} onChange={e => setPostContent(e.target.value)}></textarea>
+                  <textarea className="textarea textarea-bordered w-full h-32 bg-base-100" placeholder="Content" value={postContent} onChange={e => setPostContent(e.target.value)}></textarea>
                 )}
 
                 {postType === 'image' && (
-                  <div className="border-2 border-dashed border-[#343536] rounded-xl p-8 text-center hover:bg-[#272729] cursor-pointer transition-colors relative">
+                  <div className="border-2 border-dashed border-base-content/10 rounded-xl p-8 text-center hover:bg-base-100 cursor-pointer transition-colors relative">
                     <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e => setPostImage(e.target.files?.[0] || null)} accept="image/*" />
                     {postImage ? (
                       <div className="text-primary font-bold">{postImage.name}</div>
                     ) : (
-                      <div className="flex flex-col items-center gap-2 text-gray-400">
+                      <div className="flex flex-col items-center gap-2 text-base-content/40">
                         <PhotoIcon className="w-8 h-8" />
                         <span>Click to upload image</span>
                       </div>
@@ -741,7 +755,7 @@ const Community = ({ user }: { user: any }) => {
                     {pollOptions.map((opt, idx) => (
                       <input
                         key={idx}
-                        className="input input-bordered w-full bg-[#272729]"
+                        className="input input-bordered w-full bg-base-100"
                         placeholder={`Option ${idx + 1}`}
                         value={opt}
                         onChange={e => {
@@ -765,31 +779,6 @@ const Community = ({ user }: { user: any }) => {
         )
       }
 
-      {
-        isEditModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="card w-full max-w-xl bg-[#1A1A1B] border border-[#343536] text-gray-200">
-              <div className="p-4 border-b border-[#343536] flex justify-between"><h3 className="font-bold">Edit Post</h3><button onClick={() => setIsEditModalOpen(false)}><XMarkIcon className="w-5 h-5" /></button></div>
-              <div className="p-4">
-                <input className="input input-bordered w-full mb-2 bg-[#272729]" placeholder="Title" value={editTitle} onChange={e => setEditTitle(e.target.value)} />
-                <textarea className="textarea textarea-bordered w-full h-32 bg-[#272729]" placeholder="Content" value={editContent} onChange={e => setEditContent(e.target.value)}></textarea>
-                <div className="mt-4 flex justify-end"><button className="btn btn-primary" onClick={handleUpdatePost} disabled={updatePostMutation.isPending}>
-                  {updatePostMutation.isPending && <span className="loading loading-spinner loading-xs"></span>}
-                  Save Changes
-                </button></div>
-              </div>
-            </div>
-          </div>
-        )
-      }
-      {/* Toast Notification */}
-      {toast && (
-        <div className="toast toast-end toast-bottom z-[9999]">
-          <div className={`alert ${toast.type === 'error' ? 'alert-error' : toast.type === 'success' ? 'alert-success' : 'alert-info'} text-white`}>
-            <span>{toast.msg}</span>
-          </div>
-        </div>
-      )}
     </div >
   );
 };

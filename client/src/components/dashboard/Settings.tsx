@@ -58,7 +58,6 @@ const Settings = () => {
       {/* Header */}
       <div className="mb-10">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Settings</h2>
-        <p className="text-gray-400 mt-2">Manage your account settings and preferences.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -66,14 +65,14 @@ const Settings = () => {
         <div className="w-full lg:w-72 flex flex-col gap-2">
           <button
             onClick={() => { setActiveTab('preferences'); setMessage(null); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'preferences' ? 'bg-primary/20 text-primary border border-primary/20' : 'hover:bg-white/5 text-gray-400'
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'preferences' ? 'bg-primary/20 text-primary border border-primary/20' : 'hover:bg-base-200 text-base-content/60'
               }`}
           >
             <BellIcon className="w-5 h-5" /> Preferences
           </button>
           <button
             onClick={() => { setActiveTab('security'); setMessage(null); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'security' ? 'bg-primary/20 text-primary border border-primary/20' : 'hover:bg-white/5 text-gray-400'
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'security' ? 'bg-primary/20 text-primary border border-primary/20' : 'hover:bg-base-200 text-base-content/60'
               }`}
           >
             <ShieldCheckIcon className="w-5 h-5" /> Security
@@ -91,10 +90,10 @@ const Settings = () => {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <div className="card bg-[#1e2124] border border-white/5 shadow-xl animate-scale-in">
+            <div className="card bg-base-200 border border-base-content/5 shadow-xl animate-scale-in">
               <div className="card-body p-8">
-                <h3 className="card-title text-2xl mb-2 text-white">Password & Security</h3>
-                <p className="text-sm text-gray-500 mb-8">Manage your password and security questions.</p>
+                <h3 className="card-title text-2xl mb-2 text-base-content">Password & Security</h3>
+                <p className="text-sm text-base-content/60 mb-8">Manage your password and security questions.</p>
 
                 <form onSubmit={handlePasswordUpdate} className="space-y-6 max-w-lg">
                   <div className="form-control w-full">
@@ -104,7 +103,7 @@ const Settings = () => {
                       <input
                         type="password"
                         placeholder="••••••••"
-                        className="input input-bordered w-full pl-10 bg-[#16181b] border-white/5 focus:border-primary/50 text-white transition-all h-12"
+                        className="input input-bordered w-full pl-10 bg-base-100 border-base-content/10 focus:border-primary/50 text-base-content transition-all h-12"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         required
@@ -120,7 +119,7 @@ const Settings = () => {
                       <input
                         type="password"
                         placeholder="••••••••"
-                        className="input input-bordered w-full pl-4 bg-[#16181b] border-white/5 focus:border-primary/50 text-white transition-all h-12"
+                        className="input input-bordered w-full pl-4 bg-base-100 border-base-content/10 focus:border-primary/50 text-base-content transition-all h-12"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
@@ -135,7 +134,7 @@ const Settings = () => {
                       <input
                         type="password"
                         placeholder="••••••••"
-                        className="input input-bordered w-full pl-4 bg-[#16181b] border-white/5 focus:border-primary/50 text-white transition-all h-12"
+                        className="input input-bordered w-full pl-4 bg-base-100 border-base-content/10 focus:border-primary/50 text-base-content transition-all h-12"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
@@ -156,36 +155,36 @@ const Settings = () => {
 
           {/* Preferences Tab */}
           {activeTab === 'preferences' && (
-            <div className="card bg-[#1e2124] border border-white/5 shadow-xl animate-scale-in">
+            <div className="card bg-base-200 border border-base-content/5 shadow-xl animate-scale-in">
               <div className="card-body p-8">
-                <h3 className="card-title text-2xl mb-8 text-white">Notification Preferences</h3>
+                <h3 className="card-title text-2xl mb-8 text-base-content">Notification Preferences</h3>
 
                 <div className="space-y-8 max-w-2xl">
                   <div className="form-control w-full">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5 w-full">
+                    <label className="label cursor-pointer justify-between items-center group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
                       <div className="flex flex-col gap-1 flex-1">
-                        <span className="label-text font-bold text-lg text-gray-200">Email Notifications</span>
-                        <span className="label-text-alt text-gray-500">Receive emails about new features and roadmaps</span>
+                        <span className="label-text font-bold text-lg text-base-content">Email Notifications</span>
+                        <span className="label-text-alt text-base-content/60">Receive emails about new features and roadmaps</span>
                       </div>
                       <input type="checkbox" className="toggle toggle-primary toggle-lg" defaultChecked />
                     </label>
                   </div>
 
                   <div className="form-control w-full">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5 w-full">
+                    <label className="label cursor-pointer justify-between items-center group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
                       <div className="flex flex-col gap-1 flex-1">
-                        <span className="label-text font-bold text-lg text-gray-200">Community Replies</span>
-                        <span className="label-text-alt text-gray-500">Get notified when someone replies to your post</span>
+                        <span className="label-text font-bold text-lg text-base-content">Community Replies</span>
+                        <span className="label-text-alt text-base-content/60">Get notified when someone replies to your post</span>
                       </div>
                       <input type="checkbox" className="toggle toggle-primary toggle-lg" defaultChecked />
                     </label>
                   </div>
 
                   <div className="form-control w-full">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-white/5 p-4 rounded-xl transition-colors border border-transparent hover:border-white/5 w-full">
+                    <label className="label cursor-pointer justify-between items-center group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
                       <div className="flex flex-col gap-1 flex-1">
-                        <span className="label-text font-bold text-lg text-gray-200">Mentions</span>
-                        <span className="label-text-alt text-gray-500">Get notified when you are mentioned @user</span>
+                        <span className="label-text font-bold text-lg text-base-content">Mentions</span>
+                        <span className="label-text-alt text-base-content/60">Get notified when you are mentioned @user</span>
                       </div>
                       <input type="checkbox" className="toggle toggle-primary toggle-lg" defaultChecked />
                     </label>
@@ -194,7 +193,7 @@ const Settings = () => {
 
                 <div className="divider opacity-10 my-8"></div>
 
-                <h3 className="font-bold text-2xl text-white mb-6">Theme Settings</h3>
+                <h3 className="font-bold text-2xl text-base-content mb-6">Theme Settings</h3>
                 <div className="grid grid-cols-2 gap-6 max-w-xl">
                   <button
                     onClick={() => {
@@ -208,8 +207,8 @@ const Settings = () => {
                   </button>
                   <button
                     onClick={() => {
-                      localStorage.setItem('theme', 'lemonade');
-                      document.documentElement.setAttribute('data-theme', 'lemonade');
+                      localStorage.setItem('theme', 'caramellatte');
+                      document.documentElement.setAttribute('data-theme', 'caramellatte');
                       window.location.reload();
                     }}
                     className="btn btn-primary btn-block h-14 text-lg text-white"

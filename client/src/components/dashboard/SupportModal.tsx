@@ -4,6 +4,8 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+import { toast } from 'react-toastify';
+
 const SupportModal = ({ isOpen, onClose, user }: { isOpen: boolean; onClose: () => void; user?: any }) => {
   const [topic, setTopic] = useState('General Inquiry');
   const [message, setMessage] = useState('');
@@ -17,6 +19,8 @@ const SupportModal = ({ isOpen, onClose, user }: { isOpen: boolean; onClose: () 
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      // Simulated API call if the route is not yet fully implemented or to handle it gracefully
+      // But preserving original logic:
       await axios.post(`${API_URL}/api/support`, {
         topic,
         message,
@@ -25,12 +29,12 @@ const SupportModal = ({ isOpen, onClose, user }: { isOpen: boolean; onClose: () 
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('Message sent successfully! We will get back to you at kumarsumeet683@gmail.com.');
+      toast.success('Message sent! We will get back to you soon.');
       setMessage('');
       onClose();
     } catch (error) {
       console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again later.');
+      toast.error('Failed to send message. Please try again later.');
     } finally {
       setLoading(false);
     }
