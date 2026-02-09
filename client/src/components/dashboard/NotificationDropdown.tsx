@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import api from '../../config/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -24,14 +24,10 @@ const NotificationDropdown = ({ user }: { user: any }) => {
     queryKey: ['notifications'],
     queryFn: async () => {
       // Fetch recent posts from joined communities
-      const token = localStorage.getItem('token');
-      if (!token) return [];
-      const res = await axios.get(`${API_URL}/api/posts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      return res.data; // Assuming API returns filtered posts based on user's communities
+      const response = await api.get('/api/posts');
+      return response.data; // Assuming API returns filtered posts based on user's communities
     },
-    enabled: !!user // Only fetch if user logged in
+    enabled: !!user, // Only fetch if user logged in
   });
 
   return (

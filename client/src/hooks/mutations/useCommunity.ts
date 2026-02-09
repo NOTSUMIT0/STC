@@ -5,9 +5,7 @@ export const useCreatePost = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await api.post('/api/posts', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await api.post('/api/posts', formData);
       return response.data;
     },
     onSuccess: () => {
@@ -20,9 +18,7 @@ export const useCreateCommunity = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await api.post('/api/communities', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await api.post('/api/communities', formData);
       return response.data;
     },
     onSuccess: () => {
@@ -35,9 +31,7 @@ export const useEditCommunity = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, formData }: { id: string; formData: FormData }) => {
-      const response = await api.put(`/api/communities/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await api.put(`/api/communities/${id}`, formData);
       return response.data;
     },
     onSuccess: () => {
@@ -157,6 +151,19 @@ export const useJoinLeaveCommunity = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['communities'] });
+    },
+  });
+};
+
+export const useVotePoll = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, optionIndex }: { id: string; optionIndex: number }) => {
+      const response = await api.put(`/api/posts/${id}/vote`, { optionIndex });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
 };

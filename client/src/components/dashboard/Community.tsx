@@ -12,7 +12,7 @@ import {
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { useFetchCommunities, useFetchPosts } from '../../hooks/queries/useCommunity';
-import { useCreatePost, useCreateCommunity, useEditCommunity, useDeleteCommunity, useLikePost, useDeletePost, useUpdatePost, useJoinLeaveCommunity } from '../../hooks/mutations/useCommunity';
+import { useCreatePost, useCreateCommunity, useEditCommunity, useDeleteCommunity, useLikePost, useDeletePost, useUpdatePost, useJoinLeaveCommunity, useVotePoll } from '../../hooks/mutations/useCommunity';
 import { useFetchComments } from '../../hooks/queries/useComments';
 import { usePostComment, useLikeComment } from '../../hooks/mutations/useComments';
 
@@ -215,6 +215,7 @@ const Community = ({ user }: { user: any }) => {
   const deletePostMutation = useDeletePost();
   const updatePostMutation = useUpdatePost();
   const joinLeaveCommunityMutation = useJoinLeaveCommunity();
+  const votePollMutation = useVotePoll();
 
   // UI State
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
@@ -298,6 +299,7 @@ const Community = ({ user }: { user: any }) => {
 
   const handleCreateCommunity = () => {
     if (!newCommName) return alert('Name is required');
+    if (!user || !user._id) return alert('You must be logged in to create a community.');
 
     const formData = new FormData();
     formData.append('name', newCommName);
@@ -382,6 +384,11 @@ const Community = ({ user }: { user: any }) => {
       }
     });
   };
+
+  const handleVotePoll = (id: string, optionIndex: number) => {
+    votePollMutation.mutate({ id, optionIndex });
+  };
+
 
   const openCommEdit = () => {
     if (!activeCommunity) return;
@@ -553,6 +560,27 @@ const Community = ({ user }: { user: any }) => {
                                 className="object-contain"
                                 onError={(e) => { e.currentTarget.style.display = 'none'; }} // Hide if fails (missing local file)
                               />
+                            </div>
+                          )}
+
+                          {post.type === 'poll' && post.options && (
+                            <div className="mb-4 space-y-2">
+                              {post.options.map((opt, idx) => {
+                                const totalVotes = post.options?.reduce((acc, o) => acc + o.votes, 0) || 0;
+                                const percentage = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
+                                return (
+                                  <div key={idx} className="relative w-full bg-[#272729] rounded overflow-hidden cursor-pointer hover:bg-[#343536] transition-colors border border-[#343536]" onClick={(e) => { e.stopPropagation(); handleVotePoll(post._id, idx); }}>
+                                    <div className="absolute top-0 left-0 h-full bg-primary/20 transition-all duration-500" style={{ width: `${percentage}%` }}></div>
+                                    <div className="relative p-3 flex justify-between items-center z-10">
+                                      <span className="font-bold text-sm text-gray-200">{opt.text}</span>
+                                      <span className="text-xs font-bold text-gray-400">{percentage}% ({opt.votes})</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              <div className="text-xs text-gray-500 font-bold px-1">
+                                Total Votes: {post.options.reduce((acc, o) => acc + o.votes, 0)}
+                              </div>
                             </div>
                           )}
 

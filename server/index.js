@@ -15,6 +15,11 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+console.log('Environment Check:');
+console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'Sets' : 'Not Set');
+console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? 'Set' : 'Not Set');
+console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Not Set');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -45,7 +50,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/resources', resourceRoutes);
-app.use('/api/communities', communityRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/comments', commentRoutes);
 import supportRoutes from './routes/support.js';

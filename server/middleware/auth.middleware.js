@@ -4,6 +4,7 @@ const authenticate = (req, res, next) => {
   const token = req.cookies.token;
 
   if (!token) {
+    console.log('Auth Failed: No token provided in cookies');
     return res.status(401).json({ message: 'Authentication required' });
   }
 
