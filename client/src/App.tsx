@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Initialize theme
-    const savedTheme = localStorage.getItem('theme') || 'sunset';
+    const savedTheme = localStorage.getItem('theme') || 'caramellatte';
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 

@@ -110,10 +110,11 @@ export const useLikePost = () => {
       // Return a context object with the snapshotted value
       return { previousPosts };
     },
-    onError: (err, newTodo, context) => {
+    onError: (_err: any, _variables: any, context: any) => {
       // Rollback to the previous value
       if (context?.previousPosts) {
-        context.previousPosts.forEach(([queryKey, data]) => {
+        context.previousPosts.forEach((entry: any) => {
+          const [queryKey, data] = entry;
           queryClient.setQueryData(queryKey, data);
         });
       }

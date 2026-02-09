@@ -73,10 +73,11 @@ export const useLikeComment = () => {
 
       return { previousComments };
     },
-    onError: (err, newTodo, context) => {
+    onError: (_err: any, _variables: any, context: any) => {
       // Rollback
       if (context?.previousComments) {
-        context.previousComments.forEach(([queryKey, data]) => {
+        context.previousComments.forEach((entry: any) => {
+          const [queryKey, data] = entry;
           queryClient.setQueryData(queryKey, data);
         });
       }

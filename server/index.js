@@ -54,6 +54,10 @@ app.use('/api/communities', communityRoutes);
 app.use('/api/comments', commentRoutes);
 import supportRoutes from './routes/support.js';
 app.use('/api/support', supportRoutes);
+import todoRoutes from './routes/todos.js';
+app.use('/api/todos', todoRoutes);
+import problemRoutes from './routes/problems.js';
+app.use('/api/problems', problemRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

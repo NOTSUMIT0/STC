@@ -22,6 +22,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 import CalendarWidget from '../components/dashboard/CalendarWidget';
 import TimeTableWidget from '../components/dashboard/TimeTableWidget';
+import AnalyticsWidget from '../components/dashboard/AnalyticsWidget';
+import ProblemProgress from '../components/dashboard/ProblemProgress';
+import ProblemList from '../components/dashboard/ProblemList';
 
 const getAvatarUrl = (user: any) => {
   if (user?.avatarType === 'upload' && user?.avatarValue) {
@@ -38,7 +41,6 @@ const Dashboard = ({ user }: { user: any }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // const userSeed = user?.username || 'Felix'; // Removed in favor of getAvatarUrl
   const logoutMutation = useLogout();
 
   const handleLogout = () => {
@@ -71,12 +73,8 @@ const Dashboard = ({ user }: { user: any }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
             {/* Left Col - Filters/Preview */}
             <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
-              <div className="card bg-base-200 border-l-4 border-primary shadow-lg hover:shadow-primary/20 transition-all">
-                <div className="card-body p-5">
-                  <h3 className="uppercase text-xs font-bold text-gray-500 mb-2">My Progress</h3>
-                  <div className="radial-progress text-primary font-bold text-xl" style={{ "--value": 70, "--size": "4rem" } as any}>70%</div>
-                  <p className="text-xs mt-2 text-gray-400">DSA Course Completed</p>
-                </div>
+              <div className="h-[300px]">
+                <ProblemProgress />
               </div>
               <div className="h-[400px]">
                 <TodoList />
@@ -85,16 +83,9 @@ const Dashboard = ({ user }: { user: any }) => {
 
             {/* Middle Col - Charts/Main */}
             <div className="col-span-1 md:col-span-2 flex flex-col gap-6">
-              <div className="card bg-base-100 shadow-xl h-64">
-                <div className="card-body relative overflow-hidden">
-                  <h3 className="card-title text-sm opacity-70">Study Activity</h3>
-                  <div className="flex items-end justify-between h-full w-full gap-2 mt-4 px-2">
-                    {[40, 70, 30, 85, 50, 65, 90, 45, 60, 75, 55, 80].map((h, i) => (
-                      <div key={i} className={`w-full bg-gradient-to-t ${i % 2 === 0 ? 'from-primary to-primary/50' : 'from-secondary to-secondary/50'} rounded-t-sm transition-all hover:opacity-80`} style={{ height: `${h}%` }}></div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+
+              {/* Analytics */}
+              <AnalyticsWidget />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-80">
                 <CalendarWidget onDateSelect={setSelectedDate} selectedDate={selectedDate} />
@@ -146,32 +137,8 @@ const Dashboard = ({ user }: { user: any }) => {
               </div>
             </div>
             {/* Bottom Table */}
-            <div className="col-span-4 card bg-base-100 shadow-xl overflow-x-auto">
-              <table className="table">
-                {/* head */}
-                <thead>
-                  <tr>
-                    <th>Topic</th>
-                    <th>Status</th>
-                    <th>Difficulty</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { topic: 'Binary Trees', status: 'In Progress', diff: 'Medium', color: 'badge-warning' },
-                    { topic: 'Graph Traversal', status: 'Completed', diff: 'Hard', color: 'badge-success' },
-                    { topic: 'Dynamic Programming', status: 'Pending', diff: 'Hard', color: 'badge-error' },
-                  ].map((row, i) => (
-                    <tr key={i} className="hover:bg-base-200">
-                      <td className="font-bold">{row.topic}</td>
-                      <td><div className={`badge ${row.color} badge-sm`}>{row.status}</div></td>
-                      <td>{row.diff}</td>
-                      <td><button className="btn btn-xs btn-ghost">Start</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="col-span-4">
+              <ProblemList />
             </div>
           </div>
         );
