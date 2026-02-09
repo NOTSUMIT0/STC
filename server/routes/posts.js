@@ -72,6 +72,9 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
 
     if (!communityId) return res.status(400).json({ message: 'Community ID is required' });
 
+    console.log('Creating Post:', { type, title, communityId, hasFile: !!req.file });
+    if (req.file) console.log('File details:', req.file);
+
     // Check if user is member of the community
     const community = await Community.findById(communityId);
     if (!community) return res.status(404).json({ message: 'Community not found' });

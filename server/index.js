@@ -10,10 +10,10 @@ import resourceRoutes from './routes/resources.js';
 import communityRoutes from './routes/communities.js';
 import commentRoutes from './routes/comments.js';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 console.log('Environment Check:');
 console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? 'Sets' : 'Not Set');
@@ -54,6 +54,16 @@ app.use('/api/communities', communityRoutes);
 app.use('/api/comments', commentRoutes);
 import supportRoutes from './routes/support.js';
 app.use('/api/support', supportRoutes);
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({
+    message: 'Internal Server Error',
+    error: err.message || 'Unknown Error',
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
 
 // Database Connection
 console.log('Attempting to connect to MongoDB...');

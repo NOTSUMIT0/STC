@@ -292,8 +292,12 @@ const Community = ({ user }: { user: any }) => {
       onSuccess: () => {
         setIsPostModalOpen(false);
         setPostTitle(''); setPostContent(''); setPostImage(null); setPollOptions(['', '']);
+        showToast('Post created successfully!', 'success');
       },
-      onError: (err) => console.error(err),
+      onError: (err: any) => {
+        console.error(err);
+        showToast(err.response?.data?.message || err.message || 'Failed to create post', 'error');
+      },
     });
   };
 
