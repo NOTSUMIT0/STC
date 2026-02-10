@@ -1,7 +1,50 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import {
+  EnvelopeIcon,
+  MapPinIcon,
+  CodeBracketSquareIcon
+} from '@heroicons/react/24/outline'; // Using CodeBracketSquareIcon as a GitHub alternative if specific brand icon is needed, or just generic code icon. 
+// Note: Heroicons doesn't have brand icons like GitHub. 
+// For brand icons, we usually stick with FontAwesome or SVGs. 
+// IF the user specifically asked to fix "icons here which is not hsowing", it's likely because standard fa- classes need FontAwesome loaded.
+// Since I was asked to use libraries for better designs, I'll use Heroicons for the contact info which looks cleaner, 
+// and for the social/brand icon, I'll see if I can use a generic icon or keep using a class if I can verify FontAwesome is loaded (it might not be).
+// Given the prompt "add icons here which is not hsowing", I should probably use SVG icons directly or Heroicons to be safe.
+// I will use Heroicons `CommandLineIcon` or similar for the "GitHub" / developer profile representation.
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: 'General Inquiry',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/contact`, formData);
+      toast.success('Message sent successfully!');
+      setFormData({ firstName: '', lastName: '', email: '', subject: 'General Inquiry', message: '' });
+    } catch (error) {
+      toast.error('Failed to send message. Please try again.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-300 flex items-center justify-center p-6 pt-24 font-sans relative overflow-hidden">
 
@@ -30,19 +73,20 @@ const Contact = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <i className="fa-solid fa-envelope"></i>
+                  <EnvelopeIcon className="w-6 h-6" />
                 </div>
                 <span>contact@studentplatform.com</span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <i className="fa-solid fa-location-dot"></i>
+                  <MapPinIcon className="w-6 h-6" />
                 </div>
                 <span>Global Remote</span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <i className="fa-brands fa-github"></i>
+                  {/* Fallback for GitHub icon using generic code icon */}
+                  <CodeBracketSquareIcon className="w-6 h-6" />
                 </div>
                 <span>@NOTSUMIT0</span>
               </div>
@@ -51,7 +95,10 @@ const Contact = () => {
 
           <div className="mt-12">
             <div className="flex gap-4">
-              <div className="w-12 h-12 bg-white/10 rounded-xl"></div>
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                <span className="font-bold text-xl">S</span>
+              </div>
+              {/* Decor shapes */}
               <div className="w-12 h-12 bg-white/10 rounded-xl"></div>
               <div className="w-12 h-12 bg-white/10 rounded-xl"></div>
             </div>
@@ -60,19 +107,34 @@ const Contact = () => {
 
         {/* Right Side - Form */}
         <div className="p-10 bg-base-100">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-semibold">First Name</span>
                 </label>
-                <input type="text" placeholder="John" className="input input-bordered w-full focus:input-primary transition-all" />
+                <input
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  type="text"
+                  placeholder="John"
+                  className="input input-bordered w-full focus:input-primary transition-all"
+                  required
+                />
               </div>
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-semibold">Last Name</span>
                 </label>
-                <input type="text" placeholder="Doe" className="input input-bordered w-full focus:input-primary transition-all" />
+                <input
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  type="text"
+                  placeholder="Doe"
+                  className="input input-bordered w-full focus:input-primary transition-all"
+                />
               </div>
             </div>
 
@@ -80,15 +142,27 @@ const Contact = () => {
               <label className="label">
                 <span className="label-text font-semibold">Email Address</span>
               </label>
-              <input type="email" placeholder="john@example.com" className="input input-bordered w-full focus:input-primary transition-all" />
+              <input
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                type="email"
+                placeholder="john@example.com"
+                className="input input-bordered w-full focus:input-primary transition-all"
+                required
+              />
             </div>
 
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-semibold">Subject</span>
               </label>
-              <select className="select select-bordered w-full focus:select-primary transition-all">
-                <option disabled selected>Select a topic</option>
+              <select
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                className="select select-bordered w-full focus:select-primary transition-all"
+              >
                 <option>General Inquiry</option>
                 <option>Support</option>
                 <option>Feedback</option>
@@ -100,11 +174,22 @@ const Contact = () => {
               <label className="label">
                 <span className="label-text font-semibold">Message</span>
               </label>
-              <textarea className="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all" placeholder="How can we help you?"></textarea>
+              <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                className="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all"
+                placeholder="How can we help you?"
+                required
+              ></textarea>
             </div>
 
-            <button type="button" className="btn btn-primary w-full btn-lg shadow-lg hover:shadow-primary/30 transform hover:-translate-y-1 transition-all">
-              Send Message
+            <button
+              type="submit"
+              className="btn btn-primary w-full btn-lg shadow-lg hover:shadow-primary/30 transform hover:-translate-y-1 transition-all"
+              disabled={loading}
+            >
+              {loading ? <span className="loading loading-spinner"></span> : 'Send Message'}
             </button>
           </form>
 

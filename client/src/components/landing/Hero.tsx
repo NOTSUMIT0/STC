@@ -74,11 +74,8 @@ const Hero = () => {
             className="flex flex-col md:flex-row gap-6 justify-center items-center"
           >
             <Link to="/signup" className="btn btn-primary btn-lg rounded-full px-12 text-lg hover:scale-105 transition-transform duration-300 shadow-xl shadow-primary/30">
-              Get Started Free
+              Get Started
             </Link>
-            <button className="btn btn-ghost btn-lg rounded-full px-8 text-lg group">
-              View Demo <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
-            </button>
           </motion.div>
 
           {/* Floaty Analytics Preview Mockup */}

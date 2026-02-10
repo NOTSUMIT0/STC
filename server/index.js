@@ -58,6 +58,8 @@ import todoRoutes from './routes/todos.js';
 app.use('/api/todos', todoRoutes);
 import problemRoutes from './routes/problems.js';
 app.use('/api/problems', problemRoutes);
+import contactRoutes from './routes/contact.js';
+app.use('/api/contact', contactRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

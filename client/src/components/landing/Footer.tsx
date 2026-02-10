@@ -1,13 +1,17 @@
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useState } from 'react';
+import { PrivacyPolicyModal, TermsModal } from './LegalModals';
 
 const Footer = ({ user }: { user: any }) => {
   const navigate = useNavigate();
+  const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | null>(null);
 
   const handleLinkClick = (path: string) => {
     if (user) {
       if (path === 'dashboard') {
-        const dashboardElement = document.getElementById('dashboard-view'); // Or specific tab logic if handled via params/state
+        // const dashboardElement = document.getElementById('dashboard-view'); // Or specific tab logic if handled via params/state
         // Since dashboard uses state for tabs, we might just route to /dashboard and let user navigate or pass state
         navigate('/dashboard');
         // Note: If you want deep linking to tabs (e.g. /dashboard/roadmaps), the Dashboard component needs to handle URL params. 
@@ -41,14 +45,32 @@ const Footer = ({ user }: { user: any }) => {
             StudentPlatform
           </span>
           <p className="text-base-content/60 leading-relaxed mb-6 text-sm">
-            Empowering students worldwide with the tools they need to succeed in the modern era.
+            Empowering students worldwide with the tools they need to succeed in the modern era. We bridge the gap between theory and real-world application, fostering a collaborative environment where every learner can innovate and grow.
           </p>
           <div className="flex gap-4">
-            {['twitter', 'github', 'linkedin', 'discord'].map((social) => (
-              <a key={social} href="#" className="btn btn-circle btn-xs btn-ghost hover:bg-primary hover:text-white transition-all">
-                <i className={`fa-brands fa-${social}`}></i>
-              </a>
-            ))}
+            <a href="https://x.com/NOT_SUMIT_" target="_blank" rel="noopener noreferrer" className="btn btn-circle btn-xs btn-ghost hover:bg-primary hover:text-white transition-all">
+              <i className="fa-brands fa-twitter"></i>
+            </a>
+            <a href="https://github.com/NOTSUMIT0" target="_blank" rel="noopener noreferrer" className="btn btn-circle btn-xs btn-ghost hover:bg-primary hover:text-white transition-all">
+              <i className="fa-brands fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/sumit-kumar010/" target="_blank" rel="noopener noreferrer" className="btn btn-circle btn-xs btn-ghost hover:bg-primary hover:text-white transition-all">
+              <i className="fa-brands fa-linkedin"></i>
+            </a>
+            <a
+              href="https://discord.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Discord: not_sumit"
+              onClick={(e) => {
+                e.preventDefault();
+                navigator.clipboard.writeText("not_sumit");
+                toast.success("Discord username 'not_sumit' copied to clipboard!");
+              }}
+              className="btn btn-circle btn-xs btn-ghost hover:bg-primary hover:text-white transition-all"
+            >
+              <i className="fa-brands fa-discord"></i>
+            </a>
           </div>
         </div>
 
@@ -77,10 +99,13 @@ const Footer = ({ user }: { user: any }) => {
       <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-base-content/10 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-sm text-base-content/50">
         <p>© 2026 StudentPlatform Industries Ltd. All rights reserved.</p>
         <div className="flex gap-6 mt-4 md:mt-0">
-          <a href="#" className="hover:text-base-content">Privacy Policy</a>
-          <a href="#" className="hover:text-base-content">Terms of Service</a>
+          <button onClick={() => setActiveModal('privacy')} className="hover:text-base-content transition-colors">Privacy Policy</button>
+          <button onClick={() => setActiveModal('terms')} className="hover:text-base-content transition-colors">Terms of Service</button>
         </div>
       </div>
+      <PrivacyPolicyModal isOpen={activeModal === 'privacy'} onClose={() => setActiveModal(null)} />
+      <TermsModal isOpen={activeModal === 'terms'} onClose={() => setActiveModal(null)} />
+
     </footer>
   );
 };

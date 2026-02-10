@@ -1,8 +1,19 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import profileImg from '../assets/profile.jpg';
+import { EnvelopeIcon, CodeBracketSquareIcon } from '@heroicons/react/24/outline';
 
 const About = () => {
+  // ... (rest of the file remains unchanged until the icons)
+
+  <div className="flex gap-4 flex-wrap">
+    <a href="https://github.com/NOTSUMIT0" target="_blank" rel="noopener noreferrer" className="btn btn-primary gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300">
+      <CodeBracketSquareIcon className="w-5 h-5" /> GitHub
+    </a>
+    <a href="mailto:kumarsumeet683@gmail.com" className="btn btn-secondary gap-2 shadow-lg shadow-secondary/30 hover:shadow-secondary/50 hover:scale-105 transition-all duration-300">
+      <EnvelopeIcon className="w-5 h-5" /> Email Me
+    </a>
+  </div>
   return (
     <div className="min-h-screen bg-base-300 pt-20 pb-10 px-6 font-sans">
       {/* Hero Section */}
@@ -103,10 +114,10 @@ const About = () => {
 
                 <div className="flex gap-4 flex-wrap">
                   <a href="https://github.com/NOTSUMIT0" target="_blank" rel="noopener noreferrer" className="btn btn-primary gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all duration-300">
-                    <i className="fa-brands fa-github text-xl"></i> GitHub
+                    <CodeBracketSquareIcon className="w-5 h-5" /> GitHub
                   </a>
                   <a href="mailto:kumarsumeet683@gmail.com" className="btn btn-secondary gap-2 shadow-lg shadow-secondary/30 hover:shadow-secondary/50 hover:scale-105 transition-all duration-300">
-                    <i className="fa-solid fa-envelope text-xl"></i> Email Me
+                    <EnvelopeIcon className="w-5 h-5" /> Email Me
                   </a>
                 </div>
               </div>

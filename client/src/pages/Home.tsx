@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import Hero from '../components/landing/Hero';
 import FeatureSection from '../components/landing/FeatureSection';
-import Stats from '../components/landing/Stats';
+
 import CTA from '../components/landing/CTA';
 import Footer from '../components/landing/Footer';
+import CommunityHighlight from '../components/landing/CommunityHighlight';
 import { useState, useEffect } from 'react';
 
 const Home = ({ user }: { user: any }) => {
@@ -43,7 +44,7 @@ const Home = ({ user }: { user: any }) => {
       {/* Main Content */}
       <main>
         <Hero />
-        <Stats />
+        <CommunityHighlight />
         <FeatureSection />
         <CTA />
       </main>

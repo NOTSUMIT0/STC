@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLogin } from '../hooks/mutations/useAuth';
-
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 
 const Login = () => {
@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const { mutate: login } = useLogin();
+  const { mutate: login, isPending } = useLogin();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,57 +27,119 @@ const Login = () => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-base-300">
-      <div className="card w-96 bg-base-100 shadow-xl border border-primary/20 hover:border-primary/50 transition-all duration-300">
-        <div className="card-body">
-          <h2 className="card-title text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Welcome Back</h2>
-          <p className="text-sm text-base-content/70">Login to access your student dashboard</p>
+    <div className="min-h-screen flex bg-base-100 font-sans">
+      {/* Left Side - Context & Visuals */}
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+        className="hidden lg:flex w-1/2 bg-gradient-to-br from-primary to-accent relative overflow-hidden items-center justify-center p-12 text-white"
+      >
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+          {/* Abstract Shapes */}
+          <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 rounded-full blur-[80px]"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-[100px]"></div>
+        </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 mt-4">
+        <div className="relative z-10 max-w-lg">
+          <h1 className="text-5xl font-bold mb-6 leading-tight">Welcome Back to <span className="text-white">StudentPlatform</span></h1>
+          <p className="text-xl text-white/90 mb-8 leading-relaxed">
+            Continue your journey of learning and collaboration. Pick up right where you left off.
+          </p>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <i className="fa-solid fa-graduation-cap text-lg"></i>
+              </div>
+              <div>
+                <h4 className="font-bold">Track Your Progress</h4>
+                <p className="text-sm opacity-80">See how far you've come</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <i className="fa-solid fa-users text-lg"></i>
+              </div>
+              <div>
+                <h4 className="font-bold">Join the Community</h4>
+                <p className="text-sm opacity-80">Connect with thousands of students</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-base-100">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="w-full max-w-md"
+        >
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-2">Sign In</h2>
+            <p className="text-base-content/60">Enter your credentials to access your account.</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Email</span>
+                <span className="label-text font-semibold">Email Address</span>
               </label>
-              <input
-                type="email"
-                placeholder="email@example.com"
-                className="input input-bordered input-primary w-full bg-base-200 focus:bg-base-100 transition-colors"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/40">
+                  <i className="fa-solid fa-envelope"></i>
+                </div>
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  className="input input-bordered w-full pl-10 focus:input-primary transition-all py-6"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Password</span>
+                <span className="label-text font-semibold">Password</span>
               </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="input input-bordered input-primary w-full bg-base-200 focus:bg-base-100 transition-colors"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/40">
+                  <i className="fa-solid fa-lock"></i>
+                </div>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className="input input-bordered w-full pl-10 focus:input-primary transition-all py-6"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
               <label className="label">
-                <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
+                <span className="label-text-alt"></span>
+                <a href="#" className="label-text-alt link link-primary hover:underline">Forgot password?</a>
               </label>
             </div>
 
-            <div className="form-control mt-6">
-              <button className="btn btn-primary bg-gradient-to-r from-primary to-secondary border-none hover:shadow-lg hover:shadow-primary/50 transition-all duration-300 text-primary-content">
-                Login
-              </button>
-            </div>
+            <button
+              disabled={isPending}
+              className="btn btn-primary w-full btn-lg shadow-lg hover:shadow-primary/30 transform hover:-translate-y-1 transition-all"
+            >
+              {isPending ? <span className="loading loading-spinner"></span> : 'Sign In'}
+            </button>
           </form>
 
-          <div className="divider">OR</div>
+          <div className="divider my-8">OR</div>
 
-          <p className="text-center text-sm">
-            Don't have an account? <Link to="/signup" className="link link-primary">Sign up</Link>
+          <p className="text-center">
+            New to StudentPlatform? <Link to="/signup" className="link link-primary font-bold">Create an account</Link>
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
