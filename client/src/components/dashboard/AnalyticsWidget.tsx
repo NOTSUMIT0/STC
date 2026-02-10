@@ -39,7 +39,7 @@ const AnalyticsWidget = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Monthly Activity Bar Chart */}
       <div className="card bg-base-100 shadow-xl border border-base-content/5">
         <div className="card-body p-4">

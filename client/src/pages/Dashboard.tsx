@@ -70,9 +70,9 @@ const Dashboard = ({ user }: { user: any }) => {
       case 'Profile': return <Profile user={user} />;
       default:
         return (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
             {/* Left Col - Filters/Preview */}
-            <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
+            <div className="col-span-1 lg:col-span-1 flex flex-col gap-6">
               <div className="h-[300px]">
                 <ProblemProgress />
               </div>
@@ -82,19 +82,19 @@ const Dashboard = ({ user }: { user: any }) => {
             </div>
 
             {/* Middle Col - Charts/Main */}
-            <div className="col-span-1 md:col-span-2 flex flex-col gap-6">
+            <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
 
               {/* Analytics */}
               <AnalyticsWidget />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-80">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-auto lg:h-80">
                 <CalendarWidget onDateSelect={setSelectedDate} selectedDate={selectedDate} />
                 <TimeTableWidget />
               </div>
             </div>
 
             {/* Right Col - Profile/Extra */}
-            <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
+            <div className="col-span-1 lg:col-span-1 flex flex-col gap-6">
               <div className="card bg-gradient-to-br from-neutral to-base-100 shadow-xl text-center p-6">
                 <div className="avatar mx-auto mb-4">
                   <div className="w-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
@@ -201,7 +201,7 @@ const Dashboard = ({ user }: { user: any }) => {
       </div>
 
       {/* Main Content Padding for Navbar */}
-      <div className="pt-24 px-4 md:px-8 pb-10 max-w-[1800px] mx-auto">
+      <div className="pt-24 px-4 md:px-8 pb-32 md:pb-10 max-w-[1800px] mx-auto">
 
         {/* Page Header */}
         <div className="mb-8 animate-fade-in-down">
@@ -218,6 +218,20 @@ const Dashboard = ({ user }: { user: any }) => {
 
         {/* Dynamic Content */}
         {renderContent()}
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-base-100/90 backdrop-blur-lg border-t border-white/5 pb-safe z-50 flex justify-around items-center h-16 px-2">
+        {navItems.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => setActiveTab(item.name)}
+            className={`flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${activeTab === item.name ? 'text-primary' : 'text-gray-400'}`}
+          >
+            <item.icon className={`w-6 h-6 ${activeTab === item.name ? 'scale-110' : ''} transition-transform`} />
+            <span className="text-[10px] font-medium">{item.name}</span>
+          </button>
+        ))}
       </div>
 
       <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} user={user} />

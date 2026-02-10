@@ -429,6 +429,31 @@ const Community = ({ user }: { user: any }) => {
 
         {/* CENTER CONTENT */}
         <div className="flex-1 min-w-0 bg-base-300">
+
+          {/* Mobile Community Selector */}
+          <div className="lg:hidden flex items-center gap-2 overflow-x-auto p-4 bg-base-200 border-b border-base-content/10 sticky top-20 z-20">
+            <button
+              onClick={() => setActiveCommunity(null)}
+              className={`btn btn-sm flex-nowrap whitespace-nowrap ${!activeCommunity ? 'btn-primary' : 'btn-ghost'}`}
+            >
+              <Squares2X2Icon className="w-4 h-4" /> Home
+            </button>
+            <div className="h-6 w-px bg-base-content/10 mx-2"></div>
+            {communities.map(c => (
+              <button
+                key={c._id}
+                onClick={() => setActiveCommunity(c)}
+                className={`btn btn-sm flex-nowrap whitespace-nowrap gap-2 ${activeCommunity?._id === c._id ? 'btn-primary' : 'btn-ghost'}`}
+              >
+                <img src={c.icon.startsWith('http') ? c.icon : `${API_URL}${c.icon}`} className="w-4 h-4 rounded-full" />
+                {c.name}
+              </button>
+            ))}
+            <button onClick={() => setIsCommunityModalOpen(true)} className="btn btn-sm btn-circle btn-ghost">
+              <PlusIcon className="w-5 h-5" />
+            </button>
+          </div>
+
           {activeCommunity ? (
             <div className="mb-4">
               <div className="h-48 w-full bg-[#33a8ff] relative overflow-hidden">
