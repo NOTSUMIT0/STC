@@ -50,7 +50,7 @@ const Home = ({ user }: { user: any }) => {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer user={user} />
     </div>
   );
 };
