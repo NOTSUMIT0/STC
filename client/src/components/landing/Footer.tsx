@@ -89,7 +89,7 @@ const Footer = ({ user }: { user: any }) => {
         <div>
           <h4 className="font-bold text-lg mb-6 text-primary">Company</h4>
           <ul className="space-y-3 text-base-content/70">
-            <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+            <li><Link to="/about" className="hover:text-primary transition-colors">About Me</Link></li>
             <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
           </ul>
         </div>

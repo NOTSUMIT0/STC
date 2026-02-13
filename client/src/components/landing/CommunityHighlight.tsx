@@ -89,7 +89,7 @@ const CommunityHighlight = () => {
 
           <MockPost
             title="Best resources to learn React in 2026?"
-            author="Alex Chen"
+            author="Ritesh Sharma"
             time="2 hours ago"
             tags={['Frontend', 'React', 'Help']}
             upvotes={42}
@@ -98,7 +98,7 @@ const CommunityHighlight = () => {
           />
           <MockPost
             title="Looking for a teammate for a hackathon 🚀"
-            author="Sarah Miller"
+            author="Manpreet Singh"
             time="5 hours ago"
             tags={['Collaboration', 'Hackathon']}
             upvotes={28}
@@ -107,7 +107,7 @@ const CommunityHighlight = () => {
           />
           <MockPost
             title="My journey becoming a self-taught developer"
-            author="David Kim"
+            author="Rachit Tanwar"
             time="1 day ago"
             tags={['Career', 'Motivation']}
             upvotes={156}

@@ -3,7 +3,7 @@ import { StarIcon } from '@heroicons/react/24/solid';
 
 const testimonials = [
   {
-    name: "Alex Johnson",
+    name: "Ritesh Sharma",
     role: "Frontend Developer",
     content: "The interactive roadmaps changed the way I learn. seemingly complex topics like React and Redux became so easy to understand.",
     rating: 5,
@@ -11,7 +11,7 @@ const testimonials = [
     color: "bg-primary"
   },
   {
-    name: "Sarah Lee",
+    name: "Manpreet Singh",
     role: "Data Science Student",
     content: "I was struggling to find good resources for Python and AI. This platform curated everything I needed in one place.",
     rating: 5,
@@ -19,7 +19,7 @@ const testimonials = [
     color: "bg-secondary"
   },
   {
-    name: "Michael Chen",
+    name: "Rachit Tanwar",
     role: "Full Stack Engineer",
     content: "The community here is amazing. Getting feedback on my projects from real people helped me land my first job.",
     rating: 5,
