@@ -52,7 +52,7 @@ const NotificationDropdown = ({ user }: { user: any }) => {
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
             {isLoading ? (
               <div className="p-4 text-center text-sm text-gray-500">Loading updates...</div>
-            ) : notifications?.length === 0 ? (
+            ) : !Array.isArray(notifications) || notifications.length === 0 ? (
               <div className="p-8 text-center flex flex-col items-center">
                 <div className="w-12 h-12 bg-base-200 rounded-full flex items-center justify-center mb-3">
                   <BellIcon className="w-6 h-6 text-gray-500" />
@@ -61,7 +61,7 @@ const NotificationDropdown = ({ user }: { user: any }) => {
                 <p className="text-xs text-gray-500 mt-1">Join communities to see updates here.</p>
               </div>
             ) : (
-              notifications?.slice(0, 5).map((post: any) => (
+              notifications.slice(0, 5).map((post: any) => (
                 <div key={post._id} className="p-4 border-b border-white/5 hover:bg-base-200 transition-colors cursor-pointer group">
                   <div className="flex gap-3">
                     <div className="avatar placeholder">

@@ -58,7 +58,7 @@ const TodoList = () => {
     }
   };
 
-  const activeCount = todos.filter(t => !t.isCompleted).length;
+  const activeCount = Array.isArray(todos) ? todos.filter(t => !t.isCompleted).length : 0;
 
   return (
     <div className="card bg-base-100 shadow-xl h-full border border-base-content/5 flex flex-col overflow-hidden">
@@ -81,7 +81,7 @@ const TodoList = () => {
           <div className="flex justify-center items-center h-40">
             <span className="loading loading-spinner text-primary"></span>
           </div>
-        ) : todos.length === 0 ? (
+        ) : !Array.isArray(todos) || todos.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-center opacity-50">
             <CheckCircleIcon className="w-12 h-12 mb-2 text-primary/20" />
             <p className="text-sm">No tasks yet. Enjoy your day!</p>

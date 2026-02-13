@@ -42,9 +42,10 @@ const ProblemList = () => {
     }
   };
 
+  const safeProblems = Array.isArray(problems) ? problems : [];
   const filteredProblems = filter === 'All'
-    ? problems
-    : problems?.filter((p: any) => p.status === filter);
+    ? safeProblems
+    : safeProblems.filter((p: any) => p.status === filter);
 
   if (isLoading) return <div className="skeleton h-64 w-full"></div>;
 
