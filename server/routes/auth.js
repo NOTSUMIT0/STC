@@ -19,7 +19,11 @@ router.get('/me', authenticate, async (req, res) => {
 
 // Logout
 router.post('/logout', (req, res) => {
-  res.clearCookie('token');
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none'
+  });
   res.json({ message: 'Logged out successfully' });
 });
 
@@ -99,8 +103,8 @@ router.post('/signup', async (req, res) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Always true for Render (HTTPS)
+      sameSite: 'none', // Needed for cross-site usage (different subdomains)
       maxAge: 3600000 // 1 hour
     });
 
@@ -134,8 +138,8 @@ router.post('/login', async (req, res) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Always true for Render (HTTPS)
+      sameSite: 'none', // Needed for cross-site usage (different subdomains)
       maxAge: 3600000 // 1 hour
     });
 

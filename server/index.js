@@ -26,14 +26,21 @@ const PORT = process.env.PORT || 5000;
 import cookieParser from 'cookie-parser';
 
 // Middleware
-const allowedOrigins = ['http://localhost:5173', 'https://stc-client.onrender.com'];
+import compression from 'compression';
+app.use(compression());
+
+const allowedOrigins = ['http://localhost:5173', 'https://stc-client.onrender.com', 'https://stc-platform.onrender.com'];
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    // Check if origin is allowed explicitly or matches localhost pattern
-    if (allowedOrigins.indexOf(origin) !== -1 || /^http:\/\/localhost:\d+$/.test(origin)) {
+    // Check if origin is allowed explicitly, matches localhost, or is a Render subdomain
+    if (
+      allowedOrigins.indexOf(origin) !== -1 ||
+      /^http:\/\/localhost:\d+$/.test(origin) ||
+      origin.endsWith('.onrender.com')
+    ) {
       return callback(null, true);
     }
 
