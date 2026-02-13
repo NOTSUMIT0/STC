@@ -1,5 +1,7 @@
 # Student Platform (STC) - Your All-in-One Learning Companion
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Now-brightgreen?style=for-the-badge&logo=render)](https://stc-client.onrender.com/)
+
 ![Platform Banner](https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)
 
 ## Overview
