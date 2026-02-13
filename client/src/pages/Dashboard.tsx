@@ -71,31 +71,35 @@ const Dashboard = ({ user }: { user: any }) => {
       case 'Profile': return <Profile user={user} />;
       default:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
+          <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6 mb-6 animate-fade-in-up">
             {/* Left Col - Filters/Preview */}
-            <div className="col-span-1 lg:col-span-1 flex flex-col gap-6">
-              <div className="h-[300px]">
+            <div className="flex flex-col gap-6 lg:col-span-1 order-1">
+              <div className="min-h-[300px] lg:h-[300px]">
                 <ProblemProgress />
               </div>
-              <div className="h-[400px]">
+              <div className="min-h-[400px] lg:h-[400px]">
                 <TodoList />
               </div>
             </div>
 
             {/* Middle Col - Charts/Main */}
-            <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
+            <div className="flex flex-col gap-6 lg:col-span-2 order-2">
 
               {/* Analytics */}
               <AnalyticsWidget />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-auto lg:h-80">
-                <CalendarWidget onDateSelect={setSelectedDate} selectedDate={selectedDate} />
-                <TimeTableWidget />
+                <div className="min-h-[300px] lg:h-full">
+                  <CalendarWidget onDateSelect={setSelectedDate} selectedDate={selectedDate} />
+                </div>
+                <div className="min-h-[200px] lg:h-full">
+                  <TimeTableWidget />
+                </div>
               </div>
             </div>
 
             {/* Right Col - Profile/Extra */}
-            <div className="col-span-1 lg:col-span-1 flex flex-col gap-6">
+            <div className="flex flex-col gap-6 lg:col-span-1 order-3">
               <div className="card bg-gradient-to-br from-neutral to-base-100 shadow-xl text-center p-6">
                 <div className="avatar mx-auto mb-4">
                   <div className="w-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
@@ -143,7 +147,7 @@ const Dashboard = ({ user }: { user: any }) => {
               </div>
             </div>
             {/* Bottom Table */}
-            <div className="col-span-4">
+            <div className="w-full order-4 lg:col-span-4">
               <ProblemList />
             </div>
           </div>

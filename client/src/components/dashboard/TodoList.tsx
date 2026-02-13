@@ -76,7 +76,7 @@ const TodoList = () => {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 max-h-[300px]">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 max-h-none lg:max-h-[300px]">
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <span className="loading loading-spinner text-primary"></span>

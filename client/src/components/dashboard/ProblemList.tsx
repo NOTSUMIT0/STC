@@ -53,14 +53,15 @@ const ProblemList = () => {
     <div className="card bg-base-100 shadow-xl overflow-hidden border border-white/5">
       <div className="card-body p-0">
         {/* Header */}
-        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-base-200/50 backdrop-blur-sm">
-          <div className="flex items-center gap-4">
-            <h3 className="font-bold text-lg">My Code Problems</h3>
-            <div className="join">
+        {/* Header */}
+        <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-base-200/50 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+            <h3 className="font-bold text-lg whitespace-nowrap">My Code Problems</h3>
+            <div className="join w-full sm:w-auto overflow-x-auto">
               {['All', 'Pending', 'In Progress', 'Completed'].map(status => (
                 <button
                   key={status}
-                  className={`join-item btn btn-xs ${filter === status ? 'btn-primary' : 'btn-ghost'}`}
+                  className={`join-item btn btn-xs flex-1 sm:flex-none ${filter === status ? 'btn-primary' : 'btn-ghost'}`}
                   onClick={() => setFilter(status)}
                 >
                   {status}
@@ -68,24 +69,24 @@ const ProblemList = () => {
               ))}
             </div>
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="btn btn-sm btn-primary gap-2">
+          <button onClick={() => setIsModalOpen(true)} className="btn btn-sm btn-primary gap-2 w-full sm:w-auto">
             <PlusIcon className="w-4 h-4" />
             Add Problem
           </button>
         </div>
 
         {/* Table Container */}
-        <div className="overflow-x-auto max-h-[500px] custom-scrollbar">
-          <table className="table table-pin-rows">
+        <div className="overflow-x-auto w-full custom-scrollbar lg:max-h-[500px]">
+          <table className="table table-pin-rows w-full">
             <thead>
-              <tr className="bg-base-200/50 text-gray-400">
+              <tr className="bg-base-200/50 text-gray-400 text-xs sm:text-sm">
                 <th>Topic / Problem</th>
                 <th>Difficulty</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-xs sm:text-sm">
               {filteredProblems?.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-10 text-gray-500">
@@ -96,35 +97,35 @@ const ProblemList = () => {
                 filteredProblems?.map((problem: any) => (
                   <tr key={problem._id} className="hover:bg-base-200/50 transition-colors group">
                     <td>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col max-w-[150px] sm:max-w-none">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-base-content">{problem.title}</span>
+                          <span className="font-bold text-base-content truncate">{problem.title}</span>
                           {problem.link && (
-                            <a href={problem.link} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-primary transition-colors">
+                            <a href={problem.link} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-primary transition-colors flex-shrink-0">
                               <ArrowTopRightOnSquareIcon className="w-3 h-3" />
                             </a>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400 badge badge-ghost badge-xs mt-1">{problem.topic}</span>
+                        <span className="text-[10px] text-gray-400 badge badge-ghost badge-xs mt-1 truncate max-w-full">{problem.topic}</span>
                       </div>
                     </td>
                     <td className={`font-medium ${getDifficultyColor(problem.difficulty)}`}>
                       {problem.difficulty}
                     </td>
                     <td>
-                      <div className={`badge ${getBadgeColor(problem.status)} badge-sm gap-1`}>
+                      <div className={`badge ${getBadgeColor(problem.status)} badge-xs sm:badge-sm gap-1 whitespace-nowrap`}>
                         {problem.status}
                       </div>
                     </td>
                     <td>
-                      <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 sm:gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                         {problem.status === 'Pending' && (
                           <button
                             onClick={() => handleStatusChange(problem._id, 'In Progress')}
                             className="btn btn-square btn-xs btn-ghost text-warning tooltip tooltip-left"
                             data-tip="Start"
                           >
-                            <PlayIcon className="w-4 h-4" />
+                            <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                           </button>
                         )}
                         {problem.status !== 'Completed' && (
@@ -133,7 +134,7 @@ const ProblemList = () => {
                             className="btn btn-square btn-xs btn-ghost text-success tooltip tooltip-left"
                             data-tip="Mark Complete"
                           >
-                            <CheckCircleIcon className="w-4 h-4" />
+                            <CheckCircleIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                           </button>
                         )}
                         <button
@@ -141,7 +142,7 @@ const ProblemList = () => {
                           className="btn btn-square btn-xs btn-ghost text-error tooltip tooltip-left"
                           data-tip="Delete"
                         >
-                          <TrashIcon className="w-4 h-4" />
+                          <TrashIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                       </div>
                     </td>

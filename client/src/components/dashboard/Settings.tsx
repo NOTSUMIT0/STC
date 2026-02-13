@@ -159,34 +159,34 @@ const Settings = () => {
               <div className="card-body p-8">
                 <h3 className="card-title text-2xl mb-8 text-base-content">Notification Preferences</h3>
 
-                <div className="space-y-8 max-w-2xl">
+                <div className="space-y-4 sm:space-y-8 max-w-2xl">
                   <div className="form-control w-full">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
+                    <label className="label cursor-pointer flex-col sm:flex-row items-start sm:items-center gap-4 group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
                       <div className="flex flex-col gap-1 flex-1">
                         <span className="label-text font-bold text-lg text-base-content">Email Notifications</span>
                         <span className="label-text-alt text-base-content/60">Receive emails about new features and roadmaps</span>
                       </div>
-                      <input type="checkbox" className="toggle toggle-primary toggle-lg" defaultChecked />
+                      <input type="checkbox" className="toggle toggle-primary toggle-lg mt-2 sm:mt-0" defaultChecked />
                     </label>
                   </div>
 
                   <div className="form-control w-full">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
+                    <label className="label cursor-pointer flex-col sm:flex-row items-start sm:items-center gap-4 group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
                       <div className="flex flex-col gap-1 flex-1">
                         <span className="label-text font-bold text-lg text-base-content">Community Replies</span>
                         <span className="label-text-alt text-base-content/60">Get notified when someone replies to your post</span>
                       </div>
-                      <input type="checkbox" className="toggle toggle-primary toggle-lg" defaultChecked />
+                      <input type="checkbox" className="toggle toggle-primary toggle-lg mt-2 sm:mt-0" defaultChecked />
                     </label>
                   </div>
 
                   <div className="form-control w-full">
-                    <label className="label cursor-pointer justify-between items-center group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
+                    <label className="label cursor-pointer flex-col sm:flex-row items-start sm:items-center gap-4 group hover:bg-base-content/5 p-4 rounded-xl transition-colors border border-transparent hover:border-base-content/10 w-full">
                       <div className="flex flex-col gap-1 flex-1">
                         <span className="label-text font-bold text-lg text-base-content">Mentions</span>
                         <span className="label-text-alt text-base-content/60">Get notified when you are mentioned @user</span>
                       </div>
-                      <input type="checkbox" className="toggle toggle-primary toggle-lg" defaultChecked />
+                      <input type="checkbox" className="toggle toggle-primary toggle-lg mt-2 sm:mt-0" defaultChecked />
                     </label>
                   </div>
                 </div>

@@ -160,13 +160,13 @@ const Profile = ({ user }: { user: any }) => {
 
                 {/* Names */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="form-control hover:opacity-100 transition-opacity">
-                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1">First Name</label>
-                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content" placeholder="e.g. Alex" />
+                  <div className="form-control w-full flex flex-col hover:opacity-100 transition-opacity">
+                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1 px-1">First Name</label>
+                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content w-full" placeholder="e.g. Alex" />
                   </div>
-                  <div className="form-control">
-                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1">Last Name</label>
-                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content" placeholder="e.g. Student" />
+                  <div className="form-control w-full flex flex-col">
+                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1 px-1">Last Name</label>
+                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content w-full" placeholder="e.g. Student" />
                   </div>
                 </div>
 
@@ -180,19 +180,19 @@ const Profile = ({ user }: { user: any }) => {
 
                 {/* Education */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="form-control">
-                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1">Field of Study</label>
-                    <input type="text" name="fieldOfStudy" value={formData.fieldOfStudy} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content" placeholder="e.g. Computer Science" />
+                  <div className="form-control w-full flex flex-col">
+                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1 px-1">Field of Study</label>
+                    <input type="text" name="fieldOfStudy" value={formData.fieldOfStudy} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content w-full" placeholder="e.g. Computer Science" />
                   </div>
-                  <div className="form-control">
-                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1">University / College</label>
-                    <input type="text" name="university" value={formData.university} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content" placeholder="e.g. Stanford University" />
+                  <div className="form-control w-full flex flex-col">
+                    <label className="label text-xs font-bold uppercase text-base-content/60 mb-1 px-1">University / College</label>
+                    <input type="text" name="university" value={formData.university} onChange={handleChange} className="input input-bordered focus:input-primary bg-base-100 text-base-content w-full" placeholder="e.g. Stanford University" />
                   </div>
                 </div>
 
                 {/* Hobbies */}
-                <div className="form-control">
-                  <label className="label text-xs font-bold uppercase text-base-content/60 mb-1">Hobbies & Interests</label>
+                <div className="form-control w-full flex flex-col">
+                  <label className="label text-xs font-bold uppercase text-base-content/60 mb-1 px-1">Hobbies & Interests</label>
                   <div className="p-3 border border-base-content/10 rounded-lg bg-base-100 min-h-[3rem] flex flex-wrap gap-2 focus-within:border-primary transition-all">
                     {hobbies.map((hobby, i) => (
                       <span key={i} className="badge badge-secondary gap-1 pr-1 pl-3 py-3">
