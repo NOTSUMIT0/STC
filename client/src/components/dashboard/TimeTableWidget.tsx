@@ -1,38 +1,58 @@
 import { useState, useEffect, useRef } from 'react';
 import { PhotoIcon, XMarkIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import api from '../../config/api';
+import { useAuth } from '../../hooks/queries/useAuth';
 
 const TimeTableWidget = () => {
+  const { data: user, refetch } = useAuth();
   const [image, setImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const savedImage = localStorage.getItem('timetable_image');
-    if (savedImage) {
-      setImage(savedImage);
+    if (user?.timetableImage) {
+      setImage(user.timetableImage);
+    } else {
+      setImage(null);
     }
-  }, []);
+  }, [user]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setImage(base64String);
-        localStorage.setItem('timetable_image', base64String);
-        setIsModalOpen(false); // Close modal if open (optional, maybe keep open to see result)
-      };
-      reader.readAsDataURL(file);
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const res = await api.put('/api/auth/timetable', formData);
+        setImage(res.data.timetableImage);
+        refetch(); // Update global user state
+        setIsModalOpen(false);
+      } catch (err) {
+        console.error('Failed to upload timetable', err);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
-  const removeImage = () => {
-    setImage(null);
-    localStorage.removeItem('timetable_image');
-    setIsModalOpen(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const removeImage = async () => {
+    if (!confirm('Are you sure you want to delete your timetable?')) return;
+    try {
+      setUploading(true);
+      await api.delete('/api/auth/timetable');
+      setImage(null);
+      refetch();
+      setIsModalOpen(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (err) {
+      console.error('Failed to delete timetable', err);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -40,7 +60,9 @@ const TimeTableWidget = () => {
     <>
       <div className="card bg-base-100 shadow-xl h-full flex flex-col relative group overflow-hidden">
         <div className="card-body p-4 h-full flex flex-col items-center justify-center">
-          {!image ? (
+          {uploading ? (
+            <span className="loading loading-spinner loading-lg text-primary"></span>
+          ) : !image ? (
             <div
               onClick={() => fileInputRef.current?.click()}
               className="w-full h-full border-2 border-dashed border-base-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-base-200/50 transition-all gap-3"

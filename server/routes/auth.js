@@ -171,4 +171,38 @@ router.put('/password', authenticate, async (req, res) => {
   }
 });
 
+// Update User Timetable
+router.put('/timetable', authenticate, upload.single('image'), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (req.file) {
+      user.timetableImage = req.file.path;
+      await user.save();
+      // Fetch updated user to return clean object
+      const updatedUser = await User.findById(req.user.id).select('-password');
+      res.json(updatedUser);
+    } else {
+      res.status(400).json({ message: 'No image uploaded' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.delete('/timetable', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.timetableImage = '';
+    await user.save();
+    const updatedUser = await User.findById(req.user.id).select('-password');
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 export default router;

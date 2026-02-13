@@ -3,12 +3,16 @@ import upload from '../middleware/upload.middleware.js'; // Use Cloudinary middl
 import Resource from '../models/Resource.js';
 
 const router = express.Router();
+import auth from '../middleware/auth.middleware.js';
 
-// GET all resources
-router.get('/', async (req, res) => {
+// GET all resources (User Isolated)
+router.get('/', auth, async (req, res) => {
   try {
     const { parentId } = req.query;
-    const query = { parentId: parentId || null }; // If parentId is missing/null, fetch root. 
+    const query = {
+      parentId: parentId || null,
+      user: req.user.id // ISOLATION: Only fetch this user's resources
+    };
 
     // If parentId is 'null' string (from query params), treat as null object
     if (parentId === 'null') query.parentId = null;
@@ -21,9 +25,9 @@ router.get('/', async (req, res) => {
 });
 
 // POST create resource
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', auth, upload.single('file'), async (req, res) => {
   try {
-    const { title, type, description, url, tags, user, isPublic, parentId } = req.body;
+    const { title, type, description, url, tags, isPublic, parentId } = req.body;
     let resourceUrl = url;
 
     // If file uploaded, use Cloudinary URL
@@ -38,7 +42,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       description,
       url: resourceUrl,
       tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-      user: user || 'Anonymous', // Ideally from auth middleware
+      user: req.user.id, // ISOLATION: Attach authenticated user ID
       isPublic: isPublic === 'true',
     });
 

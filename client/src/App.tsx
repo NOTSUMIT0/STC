@@ -5,7 +5,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import PostPage from './pages/PostPage';
-import { useCheckAuth } from './hooks/queries/useAuth';
+import { useAuth } from './hooks/queries/useAuth';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,7 +14,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 
 function App() {
-  const { data: user, isLoading } = useCheckAuth();
+  const { data: user, isLoading } = useAuth();
 
 
   useEffect(() => {

@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   hobbies: [{ type: String }],
   avatarType: { type: String, enum: ['seed', 'upload'], default: 'seed' },
   avatarValue: { type: String, default: '' }, // Seed string or file path
+  timetableImage: { type: String, default: '' }, // Path to timetable image
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);
