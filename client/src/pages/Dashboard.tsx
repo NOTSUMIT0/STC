@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Roadmaps from '../components/dashboard/Roadmaps';
+import { roadmaps } from '../data/roadmaps';
 import Resources from '../components/dashboard/Resources';
 import Community from '../components/dashboard/Community';
 import Settings from '../components/dashboard/Settings';
@@ -110,29 +111,34 @@ const Dashboard = ({ user }: { user: any }) => {
 
               <div className="card bg-base-100 shadow-xl p-4">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="font-bold text-sm">Roadmaps</span>
+                  <span className="font-bold text-sm">Pinned Roadmaps</span>
                   <button onClick={() => setActiveTab('Roadmaps')} className="btn btn-xs btn-ghost">View All</button>
                 </div>
-                <div className="space-y-3">
-                  {[
-                    { name: 'Frontend', url: 'https://roadmap.sh/frontend' },
-                    { name: 'Backend', url: 'https://roadmap.sh/backend' },
-                    { name: 'DevOps', url: 'https://roadmap.sh/devops' },
-                    { name: 'Full Stack', url: 'https://roadmap.sh/full-stack' },
-                    { name: 'AI Engineer', url: 'https://roadmap.sh/ai-data-scientist' },
-                    { name: 'Cyber Security', url: 'https://roadmap.sh/cyber-security' }
-                  ].map((r) => (
-                    <a
-                      key={r.name}
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex justify-between items-center text-xs p-2 hover:bg-base-200 rounded transition-colors cursor-pointer group"
-                    >
-                      <span className="font-medium group-hover:text-primary transition-colors">{r.name}</span>
-                      <span className="badge badge-xs badge-primary">View</span>
-                    </a>
-                  ))}
+                <div className="space-y-3 min-h-[100px]">
+                  {user?.pinnedRoadmaps && user.pinnedRoadmaps.length > 0 ? (
+                    roadmaps
+                      .filter(r => user.pinnedRoadmaps.includes(r.title))
+                      .map((r: any) => (
+                        <a
+                          key={r.title}
+                          href={r.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex justify-between items-center text-xs p-2 hover:bg-base-200 rounded transition-colors cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{r.icon}</span>
+                            <span className="font-medium group-hover:text-primary transition-colors">{r.title}</span>
+                          </div>
+                          <span className="badge badge-xs badge-primary">View</span>
+                        </a>
+                      ))
+                  ) : (
+                    <div className="text-center py-4 text-xs text-base-content/50">
+                      <p>No roadmaps pinned yet.</p>
+                      <button onClick={() => setActiveTab('Roadmaps')} className="link link-primary mt-1">Explore Roadmaps</button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

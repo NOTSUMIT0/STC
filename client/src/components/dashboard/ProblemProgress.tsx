@@ -4,82 +4,89 @@ import { useProblemStats } from '../../hooks/useProblems';
 const ProblemProgress = () => {
   const { data: stats, isLoading } = useProblemStats();
 
-  // Default data if loading or empty
-  const defaultData = [
+  // If no stats are loaded yet, use 0 values
+  const rawData = stats || [
     { name: 'Completed', value: 0, color: '#4ade80' },
     { name: 'In Progress', value: 0, color: '#fbbf24' },
     { name: 'Pending', value: 0, color: '#f87171' },
   ];
 
-  const data = stats || defaultData;
-  const total = data.reduce((acc: number, curr: any) => acc + curr.value, 0);
-  const completed = data.find((d: any) => d.name === 'Completed')?.value || 0;
+  const total = rawData.reduce((acc: number, curr: any) => acc + curr.value, 0);
+  const completed = rawData.find((d: any) => d.name === 'Completed')?.value || 0;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  if (isLoading) return <div className="skeleton h-64 w-full rounded-2xl"></div>;
+  // Use gray placeholder if total is 0 to show *something*
+  const chartData = total > 0 ? rawData : [{ name: 'Empty', value: 1, color: '#e5e7eb' }];
+
+  if (isLoading) return <div className="skeleton h-full w-full rounded-2xl min-h-[300px]"></div>;
 
   return (
-    <div className="card bg-base-200 border-l-4 border-primary shadow-lg hover:shadow-primary/20 transition-all h-full">
-      <div className="card-body p-4 flex flex-col items-center">
-        <div className="w-full flex justify-between items-start mb-2">
-          <h3 className="uppercase text-xs font-bold text-gray-500">My Progress</h3>
+    <div className="card bg-base-100 shadow-xl h-full border border-base-content/5 overflow-hidden">
+      <div className="card-body p-4 flex flex-col h-full">
+        <div className="flex justify-between items-center mb-1">
+          <h3 className="font-bold text-lg text-base-content">My Progress</h3>
         </div>
 
-        <div className="w-full h-48 relative flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={5}
-                dataKey="value"
-                stroke="none"
-              >
-                {data.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', borderRadius: '0.5rem', color: '#fff' }}
-                itemStyle={{ color: '#fff' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="flex flex-row items-center justify-between flex-1 gap-2">
+          {/* Pie Chart Section - Left Side */}
+          <div className="relative w-32 h-32 flex-shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={60}
+                  paddingAngle={total > 0 ? 5 : 0}
+                  dataKey="value"
+                  stroke="none"
+                  startAngle={90}
+                  endAngle={-270}
+                  cornerRadius={total > 0 ? 4 : 0}
+                >
+                  {chartData.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={total > 0 ? entry.color : '#e5e7eb60'} />
+                  ))}
+                </Pie>
+                {total > 0 && (
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--fallback-b1,oklch(var(--b1)))', borderColor: 'var(--fallback-bc,oklch(var(--bc)/0.1))', borderRadius: '0.5rem', color: 'var(--fallback-bc,oklch(var(--bc)))', fontSize: '12px', padding: '5px' }}
+                    itemStyle={{ color: 'var(--fallback-bc,oklch(var(--bc)))' }}
+                    cursor={false}
+                  />
+                )}
+              </PieChart>
+            </ResponsiveContainer>
 
-          {/* Center Text */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-            <span className="text-2xl font-black text-white">{percentage}%</span>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider">Done</p>
-          </div>
-        </div>
-
-        {/* Custom Legend/Stats Area */}
-        <div className="w-full flex flex-col gap-3 mt-2">
-
-          {/* Legend Grid */}
-          <div className="grid grid-cols-3 gap-1 text-center">
-            {data.map((entry: any, index: number) => (
-              <div key={`legend-${index}`} className="flex flex-col items-center">
-                <div className="w-3 h-3 rounded-full mb-1" style={{ backgroundColor: entry.color }}></div>
-                <span className="text-[10px] text-gray-400">{entry.name}</span>
-                <span className="text-xs font-bold text-base-content">{entry.value}</span>
-              </div>
-            ))}
+            {/* Center Text Overlays - Scaled Down */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className={`text-xl font-black ${total > 0 ? 'text-primary' : 'text-base-content/20'}`}>
+                {percentage}%
+              </span>
+            </div>
           </div>
 
-          <div className="divider my-0"></div>
+          {/* Stats - Right Side (compacted) */}
+          <div className="flex flex-col gap-2 flex-1 min-w-0">
+            <div className="flex flex-col gap-1.5">
+              {rawData.map((entry: any) => (
+                <div key={entry.name} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }}></div>
+                    <span className="text-base-content/70 truncate">{entry.name}</span>
+                  </div>
+                  <span className="font-bold">{entry.value}</span>
+                </div>
+              ))}
+            </div>
 
-          {/* Overall Stats */}
-          <div className="flex justify-between items-center px-2">
-            <p className="text-xs font-medium text-gray-400">Total Problems</p>
-            <span className="text-sm font-bold text-white">{total}</span>
-          </div>
-          <div className="flex justify-between items-center px-2 mt-[-8px]">
-            <p className="text-xs font-medium text-gray-400">Problems Solved</p>
-            <span className="text-sm font-bold text-success">{completed}</span>
+            <div className="divider my-0 opacity-50"></div>
+
+            <div className="flex justify-between items-center bg-base-200/50 rounded p-2 border border-base-content/5">
+              <span className="text-[10px] font-bold uppercase text-base-content/50">Total</span>
+              <span className="text-lg font-black text-primary">{total}</span>
+            </div>
           </div>
         </div>
       </div>

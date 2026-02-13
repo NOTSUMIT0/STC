@@ -205,4 +205,35 @@ router.delete('/timetable', authenticate, async (req, res) => {
   }
 });
 
+// Toggle Pinned Roadmap
+router.put('/roadmaps/pin', authenticate, async (req, res) => {
+  try {
+    const { title } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Initialize if undefined
+    if (!user.pinnedRoadmaps) user.pinnedRoadmaps = [];
+
+    const index = user.pinnedRoadmaps.indexOf(title);
+    if (index === -1) {
+      // Pin it
+      user.pinnedRoadmaps.push(title);
+    } else {
+      // Unpin it
+      user.pinnedRoadmaps.splice(index, 1);
+    }
+
+    await user.save();
+
+    // Return updated user without password
+    const updatedUser = await User.findById(req.user.id).select('-password');
+    res.json(updatedUser);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;

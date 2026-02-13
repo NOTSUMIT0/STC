@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   avatarType: { type: String, enum: ['seed', 'upload'], default: 'seed' },
   avatarValue: { type: String, default: '' }, // Seed string or file path
   timetableImage: { type: String, default: '' }, // Path to timetable image
+  pinnedRoadmaps: [{ type: String }], // Array of roadmap titles
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

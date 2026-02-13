@@ -54,9 +54,14 @@ const Resources = () => {
     setLoading(true);
     try {
       const query = parentId ? `?parentId=${parentId}` : '?parentId=null';
-      const res = await fetch(`${API_URL}/api/resources${query}`);
+      const res = await fetch(`${API_URL}/api/resources${query}`, { credentials: 'include' });
       const data = await res.json();
-      setResources(data);
+      if (Array.isArray(data)) {
+        setResources(data);
+      } else {
+        console.error('Expected array but got:', data);
+        setResources([]);
+      }
     } catch (err) {
       console.error('Failed to fetch resources', err);
     } finally {
@@ -119,7 +124,7 @@ const Resources = () => {
   const handleDelete = async (id: string, type: string) => {
     if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
     try {
-      await fetch(`${API_URL}/api/resources/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/api/resources/${id}`, { method: 'DELETE', credentials: 'include' });
       fetchResources(currentFolderId);
     } catch (err) {
       console.error('Failed to delete', err);
@@ -159,7 +164,10 @@ const Resources = () => {
 
       const res = await fetch(url, {
         method,
+        headers: {
+        },
         body: formData,
+        credentials: 'include',
       });
 
       if (res.ok) {

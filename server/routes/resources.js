@@ -3,10 +3,10 @@ import upload from '../middleware/upload.middleware.js'; // Use Cloudinary middl
 import Resource from '../models/Resource.js';
 
 const router = express.Router();
-import auth from '../middleware/auth.middleware.js';
+import authenticate from '../middleware/auth.middleware.js';
 
 // GET all resources (User Isolated)
-router.get('/', auth, async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const { parentId } = req.query;
     const query = {
@@ -25,7 +25,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // POST create resource
-router.post('/', auth, upload.single('file'), async (req, res) => {
+router.post('/', authenticate, upload.single('file'), async (req, res) => {
   try {
     const { title, type, description, url, tags, isPublic, parentId } = req.body;
     let resourceUrl = url;
@@ -54,7 +54,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
 });
 
 // PUT update resource
-router.put('/:id', upload.single('file'), async (req, res) => {
+router.put('/:id', authenticate, upload.single('file'), async (req, res) => {
   try {
     const { title, type, description, url, tags, isPublic } = req.body;
     const resource = await Resource.findById(req.params.id);
@@ -84,7 +84,7 @@ router.put('/:id', upload.single('file'), async (req, res) => {
 });
 
 // DELETE resource
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ message: 'Resource not found' });
