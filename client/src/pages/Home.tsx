@@ -28,7 +28,7 @@ const Home = ({ user }: { user: any }) => {
         <div className="flex-none flex items-center gap-4 px-4">
           {user ? (
             <Link to="/dashboard" className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-0.5">
-              Dashboard ({user.username})
+              Dashboard ({user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username || 'User'})
             </Link>
           ) : (
             <>

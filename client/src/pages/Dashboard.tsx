@@ -101,7 +101,7 @@ const Dashboard = ({ user }: { user: any }) => {
                     <img src={getAvatarUrl(user)} alt="avatar" />
                   </div>
                 </div>
-                <h3 className="font-bold text-lg">{user?.username}</h3>
+                <h3 className="font-bold text-lg">{user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}</h3>
                 <p className="text-xs text-primary">{user?.email}</p>
                 <div className="mt-4">
                   <button onClick={() => setIsSupportModalOpen(true)} className="btn btn-sm btn-outline btn-primary w-full">Contact Support</button>
@@ -144,6 +144,8 @@ const Dashboard = ({ user }: { user: any }) => {
         );
     }
   };
+
+  if (!user) return <div className="min-h-screen flex items-center justify-center"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
 
   return (
     <div className="min-h-screen bg-base-300 text-base-content font-sans">
