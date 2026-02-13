@@ -1,19 +1,19 @@
-# 🎓 Student Platform (STC) - Your All-in-One Learning Companion
+# Student Platform (STC) - Your All-in-One Learning Companion
 
 ![Platform Banner](https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)
 
-## 🚀 Overview
+## Overview
 
 **Student Platform (STC)** is a comprehensive web application designed to empower students in their self-learning journey. It addresses the common challenges of fragmented resources, lack of structured guidance, and isolation by providing a centralized hub for productivity, learning, and community engagement.
 
-### ❓ The Problem
+### The Problem
 Students often struggle with:
 -   **Information Overload:** Too many resources scattered across different platforms.
 -   **Lack of Direction:** Not knowing what to learn next or how to structure their studies.
 -   **Isolation:** Learning alone without peer support or feedback.
 -   **Disorganization:** Difficulty tracking progress, tasks, and schedules effectively.
 
-### ✅ The Solution
+### The Solution
 STC solves these problems by integrating:
 -   **Structured Roadmaps:** Clear, step-by-step guides for mastering new skills.
 -   **Centralized Resources:** A unified place to store and share notes, links, and files.
@@ -22,9 +22,9 @@ STC solves these problems by integrating:
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 1. 📊 Interactive Dashboard
+### 1. Interactive Dashboard
 Your personal command center.
 -   **Progress Tracking:** Visual pie charts showing your completion status of coding problems.
 -   **Task Management:** A simple yet effective To-Do list to keep you on track.
@@ -32,19 +32,19 @@ Your personal command center.
 -   **Analytics:** Weekly and monthly analysis of your study habits.
 -   **Pinned Roadmaps:** Quick access to the learning paths you are currently focused on.
 
-### 2. 🗺️ Learning Roadmaps
+### 2. Learning Roadmaps
 Don't get lost in the sea of tutorials.
 -   **Curated Paths:** Frontend, Backend, DevOps, AI/ML, and more.
 -   **Progressive Learning:** Step-by-step modules to ensure a solid foundation.
 -   **Pinning System:** Save roadmaps to your dashboard for easy access.
 
-### 3. 📚 Resource Hub
+### 3. Resource Hub
 Organize your learning materials.
 -   **File Management:** Upload and organize notes, PDFs, and images.
 -   **Folder Structure:** create nested folders to keep subjects separate.
 -   **Link Sharing:** Save important URLs for later reference.
 
-### 4. 🤝 Community & Support
+### 4. Community & Support
 Learn together, grow together.
 -   **Discussion Forums:** Post questions, share insights, and get answers.
 -   **Polls:** Participate in community decisions or fun surveys.
@@ -52,7 +52,7 @@ Learn together, grow together.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 This project is built using the MERN stack with modern tools for performance and UI.
 
@@ -65,7 +65,7 @@ This project is built using the MERN stack with modern tools for performance and
 
 ---
 
-## 🔄 User Flow Diagram
+## User Flow Diagram
 
 ```mermaid
 graph TD
@@ -105,7 +105,7 @@ graph TD
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these steps to set up the project locally on your machine.
 
@@ -170,7 +170,7 @@ Follow these steps to set up the project locally on your machine.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! If you have ideas for new features or improvements:
 1.  Fork the repository.
@@ -181,7 +181,7 @@ Contributions are welcome! If you have ideas for new features or improvements:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
