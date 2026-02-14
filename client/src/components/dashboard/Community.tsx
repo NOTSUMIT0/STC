@@ -334,6 +334,11 @@ const Community = ({ user }: { user: any }) => {
       onSuccess: (updated) => {
         setActiveCommunity(updated);
         setIsEditCommModalOpen(false);
+        toast.success('Community updated successfully!');
+      },
+      onError: (err: any) => {
+        console.error(err);
+        toast.error(err.response?.data?.message || 'Failed to update community');
       }
     });
   };
@@ -692,9 +697,13 @@ const Community = ({ user }: { user: any }) => {
                 {isEditCommModalOpen ? (
                   <>
                     <label className="text-xs font-bold text-base-content/60">Description</label>
-                    <textarea className="textarea textarea-bordered w-full bg-base-100" value={editCommDesc} onChange={e => setEditCommDesc(e.target.value)} />
+                    <textarea className="textarea textarea-bordered w-full bg-base-100" maxLength={500} value={editCommDesc} onChange={e => setEditCommDesc(e.target.value)} />
+                    <div className="text-xs text-right text-base-content/40 mb-2">{editCommDesc.length}/500</div>
+
                     <label className="text-xs font-bold text-base-content/60">Rules</label>
-                    <textarea className="textarea textarea-bordered h-24 w-full bg-base-100" value={editCommRules} onChange={e => setEditCommRules(e.target.value)} />
+                    <textarea className="textarea textarea-bordered h-24 w-full bg-base-100" maxLength={1000} value={editCommRules} onChange={e => setEditCommRules(e.target.value)} />
+                    <div className="text-xs text-right text-base-content/40 mb-2">{editCommRules.length}/1000</div>
+
                     <div>
                       <label className="text-xs font-bold block mb-1 text-base-content/60">Update Icon</label>
                       <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-base-100" onChange={e => setEditCommIcon(e.target.files?.[0] || null)} />
@@ -711,9 +720,12 @@ const Community = ({ user }: { user: any }) => {
                 ) : (
                   <>
                     <label className="text-xs font-bold text-base-content/60">Name</label>
-                    <div className="relative"><span className="absolute left-3 top-3 text-base-content/40">c/</span><input className="input input-bordered w-full pl-8 bg-base-100" value={newCommName} onChange={e => setNewCommName(e.target.value)} /></div>
+                    <div className="relative"><span className="absolute left-3 top-3 text-base-content/40">c/</span><input className="input input-bordered w-full pl-8 bg-base-100" maxLength={30} value={newCommName} onChange={e => setNewCommName(e.target.value)} /></div>
+
                     <label className="text-xs font-bold text-base-content/60">Description</label>
-                    <textarea className="textarea textarea-bordered w-full bg-base-100" value={newCommDesc} onChange={e => setNewCommDesc(e.target.value)} />
+                    <textarea className="textarea textarea-bordered w-full bg-base-100" maxLength={500} value={newCommDesc} onChange={e => setNewCommDesc(e.target.value)} />
+                    <div className="text-xs text-right text-base-content/40 mb-2">{newCommDesc.length}/500</div>
+
                     <div>
                       <label className="text-xs font-bold block mb-1 text-base-content/60">Icon (Optional)</label>
                       <input type="file" className="file-input file-input-bordered file-input-sm w-full bg-base-100" onChange={e => setNewCommIcon(e.target.files?.[0] || null)} />

@@ -47,6 +47,12 @@ router.post('/', authenticate, upload.fields([{ name: 'icon', maxCount: 1 }, { n
     if (!name) {
       return res.status(400).json({ message: 'Name is required' });
     }
+    if (description && description.length > 500) {
+      return res.status(400).json({ message: 'Description exceeds 500 characters' });
+    }
+    if (rules && rules.length > 1000) {
+      return res.status(400).json({ message: 'Rules exceed 1000 characters' });
+    }
 
     const existing = await Community.findOne({ name });
     if (existing) return res.status(400).json({ message: 'Community name already taken' });
@@ -101,7 +107,17 @@ router.post('/', authenticate, upload.fields([{ name: 'icon', maxCount: 1 }, { n
 });
 
 // PUT update community
-router.put('/:id', authenticate, upload.fields([{ name: 'icon', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), async (req, res) => {
+router.put('/:id', authenticate, (req, res, next) => {
+  upload.fields([{ name: 'icon', maxCount: 1 }, { name: 'banner', maxCount: 1 }])(req, res, (err) => {
+    if (err) {
+      console.error('Upload Middleware Error:', err);
+      return res.status(400).json({ message: `Upload Failed: ${err.message}` });
+    }
+    console.log('Upload Middleware Passed');
+    next();
+  });
+}, async (req, res) => {
+  console.log('PUT Community: Route handler reached');
   try {
     const { description, rules, privacy } = req.body;
 
@@ -111,6 +127,13 @@ router.put('/:id', authenticate, upload.fields([{ name: 'icon', maxCount: 1 }, {
 
     if (existingCommunity.creator.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Only the creator can edit this community' });
+    }
+
+    if (description && description.length > 500) {
+      return res.status(400).json({ message: 'Description exceeds 500 characters' });
+    }
+    if (rules && rules.length > 1000) {
+      return res.status(400).json({ message: 'Rules exceed 1000 characters' });
     }
 
     const updateData = { description, rules, privacy };
