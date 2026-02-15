@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { DocumentTextIcon, LinkIcon, XMarkIcon, EllipsisVerticalIcon, GlobeAltIcon, ArrowTopRightOnSquareIcon, FolderIcon, ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { FolderIcon as FolderIconSolid } from '@heroicons/react/24/solid';
+import { API_BASE_URL as API_URL } from '../../config/constants';
 
 interface Resource {
   _id: string;
@@ -44,7 +45,7 @@ const Resources = () => {
   // Dropdown state
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 
   useEffect(() => {
     fetchResources(currentFolderId);

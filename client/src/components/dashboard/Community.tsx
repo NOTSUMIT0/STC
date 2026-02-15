@@ -17,7 +17,7 @@ import { useCreatePost, useCreateCommunity, useEditCommunity, useDeleteCommunity
 import { useFetchComments } from '../../hooks/queries/useComments';
 import { usePostComment, useLikeComment } from '../../hooks/mutations/useComments';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_BASE_URL as API_URL } from '../../config/constants';
 
 // Helper to get avatar URL
 const getAvatarUrl = (user: any) => {

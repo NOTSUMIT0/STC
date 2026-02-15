@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+import { API_BASE_URL } from './constants';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '', // Empty string ensures relative paths work correctly (e.g. /api/todos)
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 

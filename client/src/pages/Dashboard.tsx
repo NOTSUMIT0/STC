@@ -19,7 +19,7 @@ import {
 import { useLogout } from '../hooks/mutations/useAuth';
 import NotificationDropdown from '../components/dashboard/NotificationDropdown';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_BASE_URL as API_URL } from '../config/constants';
 
 import CalendarWidget from '../components/dashboard/CalendarWidget';
 import TimeTableWidget from '../components/dashboard/TimeTableWidget';

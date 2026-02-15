@@ -7,7 +7,7 @@ import { usePostComment, useLikeComment } from '../hooks/mutations/useComments';
 import { useState, useMemo } from 'react';
 import { BookOpenIcon, ChatBubbleLeftIcon, ShareIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_BASE_URL as API_URL } from '../config/constants';
 
 // Duplicate helper (should be in utils)
 const getAvatarUrl = (user: any) => {
