@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const { mutate: login, isPending } = useLogin();
@@ -112,13 +113,20 @@ const Login = () => {
                   <i className="fa-solid fa-lock"></i>
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
-                  className="input input-bordered w-full pl-10 focus:input-primary transition-all py-6"
+                  className="input input-bordered w-full pl-10 pr-10 focus:input-primary transition-all py-6"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary/80 hover:text-primary focus:outline-none transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                </button>
               </div>
               <label className="label">
                 <span className="label-text-alt"></span>

@@ -8,6 +8,7 @@ const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const { mutate: signup, isPending } = useSignup();
@@ -132,13 +133,20 @@ const Signup = () => {
                   <i className="fa-solid fa-lock"></i>
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Create a strong password"
-                  className="input input-bordered w-full pl-10 focus:input-secondary transition-all py-6"
+                  className="input input-bordered w-full pl-10 pr-10 focus:input-secondary transition-all py-6"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary/80 hover:text-secondary focus:outline-none transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                </button>
               </div>
             </div>
 
