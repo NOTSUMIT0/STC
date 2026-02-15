@@ -133,6 +133,23 @@ const Resources = () => {
   };
 
   const handleSubmit = async () => {
+    // Validation
+    if (!title.trim()) {
+      toast.error(modalType === 'create_folder' ? 'Please enter a folder name' : 'Please enter a title');
+      return;
+    }
+
+    if (modalType !== 'create_folder') {
+      if (activeTab === 'link' && !linkUrl.trim()) {
+        toast.error('Please enter a valid URL');
+        return;
+      }
+      if (activeTab === 'file' && !file && !currentId) { // If editing, file might not change
+        toast.error('Please upload a file');
+        return;
+      }
+    }
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('tags', tags);
@@ -200,13 +217,13 @@ const Resources = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h2 className="text-3xl font-bold text-base-content">Library & Resources</h2>
-          <div className="flex items-center gap-2 text-sm text-gray-400 mt-2">
+          <div className="flex items-center gap-2 text-sm text-base-content/60 mt-2">
             {breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center gap-1">
                 {index > 0 && <ChevronRightIcon className="w-4 h-4" />}
                 <button
                   onClick={() => handleNavigate(crumb.id, crumb.name)}
-                  className={`hover:text-white transition-colors ${index === breadcrumbs.length - 1 ? 'font-bold text-white' : ''}`}
+                  className={`hover:text-primary transition-colors ${index === breadcrumbs.length - 1 ? 'font-bold text-base-content' : ''}`}
                 >
                   {index === 0 ? <HomeIcon className="w-4 h-4" /> : crumb.name}
                 </button>
@@ -222,7 +239,7 @@ const Resources = () => {
             <FolderIcon className="w-4 h-4" /> New Folder
           </button>
           <button
-            className="btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/20"
+            className="btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/20 text-white"
             onClick={() => handleOpenModal('add_resource')}
           >
             <span>+</span> Add Resource
@@ -237,7 +254,7 @@ const Resources = () => {
 
           {resources.length === 0 && (
             <div className="text-center py-16 text-base-content/60 bg-base-200/50 rounded-xl border border-base-content/10 border-dashed">
-              <FolderIcon className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+              <FolderIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
               <p className="text-lg font-medium">This folder is empty</p>
               <p className="text-sm">Create a folder or add a resource to get started.</p>
             </div>
@@ -246,24 +263,24 @@ const Resources = () => {
           {/* Folders Section */}
           {folders.length > 0 && (
             <div>
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 px-1">Folders</h3>
+              <h3 className="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 px-1">Folders</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {folders.map((folder) => (
                   <div
                     key={folder._id}
-                    className="group relative flex items-center p-4 bg-base-200 rounded-xl border border-base-content/5 hover:border-base-content/10 hover:bg-base-100 transition-all duration-200 cursor-pointer"
+                    className="group relative flex items-center p-4 bg-base-100 rounded-xl border border-base-content/10 hover:border-primary/50 hover:shadow-md transition-all duration-200 cursor-pointer"
                     onClick={() => handleNavigate(folder._id, folder.title)}
                   >
-                    <FolderIconSolid className="w-10 h-10 text-yellow-500/80 mr-4" />
+                    <FolderIconSolid className="w-10 h-10 text-yellow-500 mr-4" />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-base-content truncate group-hover:text-primary transition-colors">{folder.title}</h4>
-                      <p className="text-xs text-gray-500">{folder.tags.length > 0 ? folder.tags[0] : 'Folder'}</p>
+                      <p className="text-xs text-base-content/60">{folder.tags.length > 0 ? folder.tags[0] : 'Folder'}</p>
                     </div>
 
                     <div className="relative" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setOpenDropdownId(openDropdownId === folder._id ? null : folder._id)}
-                        className="btn btn-ghost btn-circle btn-xs text-gray-400 hover:text-white"
+                        className="btn btn-ghost btn-circle btn-xs text-base-content/60 hover:text-base-content"
                       >
                         <EllipsisVerticalIcon className="w-4 h-4" />
                       </button>
@@ -283,19 +300,19 @@ const Resources = () => {
           {/* Files Section */}
           {files.length > 0 && (
             <div>
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 px-1">Resources</h3>
+              <h3 className="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 px-1">Resources</h3>
               <div className="grid grid-cols-1 gap-3">
                 {files.map((item) => (
-                  <div key={item._id} className="group relative flex items-center justify-between p-3 bg-base-200 rounded-xl border border-base-content/5 hover:border-base-content/10 hover:bg-base-100 transition-all duration-200 shadow-sm">
+                  <div key={item._id} className="group relative flex items-center justify-between p-3 bg-base-100 rounded-xl border border-base-content/10 hover:border-primary/50 hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-4 flex-1 cursor-pointer" onClick={() => { setSelectedResource(item); setIsViewModalOpen(true); }}>
-                      <div className={`p-2 rounded-lg ${item.url && item.url.startsWith('/uploads') ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                      <div className={`p-2 rounded-lg ${item.url && item.url.startsWith('/uploads') ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
                         {item.url && item.url.startsWith('/uploads') ? <DocumentTextIcon className="w-5 h-5" /> : <LinkIcon className="w-5 h-5" />}
                       </div>
                       <div>
                         <h3 className="font-bold text-sm text-base-content group-hover:text-primary transition-colors">{item.title}</h3>
                         <div className="flex gap-2">
                           {item.tags.map((tag, i) => (
-                            <span key={i} className="text-[10px] text-base-content/60 bg-base-content/5 px-1.5 py-0.5 rounded border border-base-content/5">{tag}</span>
+                            <span key={i} className="text-[10px] text-base-content/60 bg-base-200 px-1.5 py-0.5 rounded border border-base-content/10">{tag}</span>
                           ))}
                         </div>
                       </div>
@@ -304,14 +321,14 @@ const Resources = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openResourceLink(item.url)}
-                        className="btn btn-ghost btn-xs text-gray-400 hover:text-white hidden sm:flex"
+                        className="btn btn-ghost btn-xs text-base-content/60 hover:text-base-content hidden sm:flex"
                       >
                         Access
                       </button>
                       <div className="relative">
                         <button
                           onClick={() => setOpenDropdownId(openDropdownId === item._id ? null : item._id)}
-                          className="btn btn-ghost btn-circle btn-sm text-gray-400 hover:bg-white/5"
+                          className="btn btn-ghost btn-circle btn-sm text-base-content/60 hover:bg-base-200"
                         >
                           <EllipsisVerticalIcon className="w-4 h-4" />
                         </button>
@@ -334,29 +351,29 @@ const Resources = () => {
       {/* Unified Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="card w-full max-w-lg bg-base-200 shadow-2xl border border-base-content/10 animate-pop-in">
+          <div className="card w-full max-w-lg bg-base-100 shadow-2xl border border-base-content/10 animate-pop-in">
             <div className="card-body p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-xl text-white">
+                <h3 className="font-bold text-xl text-base-content">
                   {modalType === 'create_folder' ? 'Create New Folder' : (modalType === 'edit' ? 'Edit Item' : 'Add New Resource')}
                 </h3>
-                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
-                  <XMarkIcon className="w-6 h-6" />
+                <button onClick={() => setIsModalOpen(false)} className="btn btn-circle btn-ghost btn-sm text-base-content/60 hover:text-base-content">
+                  <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 {modalType !== 'create_folder' && (
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-base-100 rounded-lg mb-4">
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-base-200 rounded-lg mb-4">
                     <button
                       onClick={() => setActiveTab('link')}
-                      className={`btn btn-sm border-none ${activeTab === 'link' ? 'bg-base-200 text-base-content shadow' : 'bg-transparent text-base-content/60 hover:text-base-content'}`}
+                      className={`btn btn-sm border-none ${activeTab === 'link' ? 'bg-base-100 text-base-content shadow-sm' : 'bg-transparent text-base-content/60 hover:text-base-content'}`}
                     >
                       <GlobeAltIcon className="w-4 h-4 mr-2" /> Link
                     </button>
                     <button
                       onClick={() => setActiveTab('file')}
-                      className={`btn btn-sm border-none ${activeTab === 'file' ? 'bg-base-200 text-base-content shadow' : 'bg-transparent text-base-content/60 hover:text-base-content'}`}
+                      className={`btn btn-sm border-none ${activeTab === 'file' ? 'bg-base-100 text-base-content shadow-sm' : 'bg-transparent text-base-content/60 hover:text-base-content'}`}
                     >
                       <DocumentTextIcon className="w-4 h-4 mr-2" /> File
                     </button>
@@ -364,7 +381,7 @@ const Resources = () => {
                 )}
 
                 <div className="form-control w-full">
-                  <label className="label text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">
+                  <label className="label text-xs font-bold text-base-content/60 uppercase tracking-wide mb-1">
                     {modalType === 'create_folder' ? 'Folder Name' : 'Title'}
                   </label>
                   <input
@@ -372,53 +389,53 @@ const Resources = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={modalType === 'create_folder' ? "e.g. Mathematics" : "e.g. Advanced Calculus Note"}
-                    className="input input-bordered w-full bg-base-100 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+                    className="input input-bordered w-full bg-base-200 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
                   />
                 </div>
 
                 <div className="form-control w-full">
-                  <label className="label text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Tags (Optional)</label>
+                  <label className="label text-xs font-bold text-base-content/60 uppercase tracking-wide mb-1">Tags (Optional)</label>
                   <input
                     type="text"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="e.g. Math, Exam Prep"
-                    className="input input-bordered w-full bg-base-100 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50"
+                    className="input input-bordered w-full bg-base-200 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50"
                   />
                 </div>
 
                 {modalType !== 'create_folder' && (
                   <>
                     <div className="form-control w-full">
-                      <label className="label text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Description</label>
+                      <label className="label text-xs font-bold text-base-content/60 uppercase tracking-wide mb-1">Description</label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="textarea textarea-bordered h-20 w-full bg-base-100 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50 resize-none"
+                        className="textarea textarea-bordered h-20 w-full bg-base-200 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50 resize-none"
                         placeholder="Brief description..."
                       ></textarea>
                     </div>
 
                     <div className="form-control w-full">
-                      <label className="label text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">
+                      <label className="label text-xs font-bold text-base-content/60 uppercase tracking-wide mb-1">
                         {activeTab === 'link' ? 'URL' : 'Upload File'}
                       </label>
                       {activeTab === 'link' ? (
                         <div className="relative">
-                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-base-content/40" />
                           <input
                             type="url"
                             value={linkUrl}
                             onChange={(e) => setLinkUrl(e.target.value)}
                             placeholder="https://example.com"
-                            className="input input-bordered w-full pl-10 bg-base-100 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50"
+                            className="input input-bordered w-full pl-10 bg-base-200 border-base-content/10 text-base-content focus:outline-none focus:border-primary/50"
                           />
                         </div>
                       ) : (
                         <input
                           type="file"
                           onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-                          className="file-input file-input-bordered w-full bg-base-100 border-base-content/10 text-base-content/60 file-input-primary focus:outline-none"
+                          className="file-input file-input-bordered w-full bg-base-200 border-base-content/10 text-base-content/60 file-input-primary focus:outline-none"
                         />
                       )}
                     </div>
@@ -427,8 +444,8 @@ const Resources = () => {
               </div>
 
               <div className="card-actions justify-end mt-8">
-                <button className="btn btn-ghost hover:bg-white/5 text-gray-400" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button className="btn btn-primary bg-gradient-to-r from-secondary to-accent border-none" onClick={handleSubmit}>
+                <button className="btn btn-ghost hover:bg-base-200 text-base-content/60 hover:text-base-content" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button className="btn btn-primary text-white" onClick={handleSubmit}>
                   {modalType === 'edit' ? 'Save Changes' : (modalType === 'create_folder' ? 'Create Folder' : 'Add Resource')}
                 </button>
               </div>
