@@ -105,7 +105,7 @@ const CommentNode = ({
         <div className="w-6 h-6 rounded-full overflow-hidden bg-base-300">
           <img src={getAvatarUrl(comment.author)} className="w-full h-full object-cover" />
         </div>
-        <span className="font-bold text-xs text-base-content/80">{comment.author.username}</span>
+        <span className="font-bold text-xs text-base-content/80">{comment.author?.username || 'Deleted User'}</span>
         <span className="text-[10px] text-base-content/60">• {new Date(comment.createdAt).toLocaleDateString()}</span>
       </div>
       <p className="text-sm text-base-content mb-2">{comment.content}</p>
@@ -554,8 +554,8 @@ const Community = ({ user }: { user: any }) => {
                   // If we are in 'Home' view, post.community is populated.
                   // If we are in 'Community' view, we can also use activeCommunity.creator.
                   const postCommunity = post.community as unknown as CommunityType; // Type assertion since structure matches
-                  const isPostCreator = (postCommunity?.creator === post.author._id) || (activeCommunity?.creator === post.author._id);
-                  const isAuthor = post.author.username === user.username;
+                  const isPostCreator = (postCommunity?.creator === post.author?._id) || (activeCommunity?.creator === post.author?._id);
+                  const isAuthor = post.author?.username === user?.username;
                   const canModerate = isMod && activeCommunity?._id === postCommunity?._id; // If I am mod of this community, I can delete this post
 
                   return (
@@ -567,7 +567,7 @@ const Community = ({ user }: { user: any }) => {
                               {post.community && !activeCommunity && <span className="font-bold text-base-content hover:underline">c/{post.community.name}</span>}
                               <div className="flex items-center gap-1">
                                 <div className="w-4 h-4 rounded-full overflow-hidden"><img src={getAvatarUrl(post.author)} className="w-full h-full object-cover" /></div>
-                                <span className={`font-bold ${isPostCreator ? 'text-green-500' : ''}`}>u/{post.author.username}</span>
+                                <span className={`font-bold ${isPostCreator ? 'text-green-500' : ''}`}>u/{post.author?.username || 'Deleted User'}</span>
                                 {isPostCreator && <span className="badge badge-xs badge-success text-[8px] font-bold text-black ml-1">MOD</span>}
                               </div>
                               <span>• {new Date(post.createdAt).toLocaleDateString()}</span>
